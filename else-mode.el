@@ -422,56 +422,56 @@ Contains True or False (t or nil) and is indexed by character code")
         (local-end end))
 
     ;; Xemacs changes here
-    (if (and else-in-xemacs else-move-change)
-        (progn
-          (setq local-begin (marker-position else-move-to-position))
-          (setq local-end (+ local-begin (- end begin)))
-          (goto-char local-begin)
-          (setq move-text (buffer-substring begin end))
-          (delete-region begin end)
-          ;; At this point we need to 'modify' the undo list for the buffer
-          ;; i.e. to allow the user to perform a seamless undo, we have to
-          ;; delete the events that have just occurred e.g. the insert of text
-          ;; into the buffer at the 'wrong' place and the subsequent deleting of
-          ;; that text. The only event we wish to remain in the undo list is the
-          ;; insertion of the text into the 'correct' place in the buffer (which
-          ;; will be accomplished directly after we remove the two mentioned
-          ;; events).
-          (setq buffer-undo-list (cdr (cdr buffer-undo-list)))
-          ;; Now insert the text where it should have originally gone. Note that
-          ;; this is the event that will be recorded in the buffer unto list.
-          (insert move-text)
-          (setq else-move-change nil)))
+    (when (and else-in-xemacs else-move-change)
+      (setq local-begin (marker-position else-move-to-position))
+      (setq local-end (+ local-begin (- end begin)))
+      (goto-char local-begin)
+      (setq move-text (buffer-substring begin end))
+      (delete-region begin end)
+      ;; At this point we need to 'modify' the undo list for the buffer
+      ;; i.e. to allow the user to perform a seamless undo, we have to
+      ;; delete the events that have just occurred e.g. the insert of text
+      ;; into the buffer at the 'wrong' place and the subsequent deleting of
+      ;; that text. The only event we wish to remain in the undo list is the
+      ;; insertion of the text into the 'correct' place in the buffer (which
+      ;; will be accomplished directly after we remove the two mentioned
+      ;; events).
+      (setq buffer-undo-list (cdr (cdr buffer-undo-list)))
+      ;; Now insert the text where it should have originally gone. Note that
+      ;; this is the event that will be recorded in the buffer unto list.
+      (insert move-text)
+      (setq else-move-change nil))
 
-    (if (and (not undo-in-progress)
-             else-Auto-Sub-Active
-             (>= local-begin (marker-position (car (nth 1 else-Auto-Sub-Marker-List))))
-             (< local-end (marker-position (cdr (nth 1 else-Auto-Sub-Marker-List)))))
-        (progn
-          (save-excursion
-            ;; want to iterate over all of the active markers in the marker
-            ;; list. This starts at the second entry in the marker list.
-            (setq marker-index 2)
-            (while (and (marker-position
-                         (car (nth marker-index
-                                   else-Auto-Sub-Marker-List)))
-                        (<= marker-index (car else-Auto-Sub-Marker-List)))
-              (delete-region (marker-position
-                              (car (nth marker-index
-                                        else-Auto-Sub-Marker-List)))
-                             (1- (marker-position
-                                  (cdr (nth marker-index
-                                            else-Auto-Sub-Marker-List)))))
-              (goto-char (marker-position
+    (when (and (not undo-in-progress)
+               else-Auto-Sub-Active
+               (>= local-begin
+                   (marker-position (car (nth 1 else-Auto-Sub-Marker-List))))
+               (< local-end
+                  (marker-position (cdr (nth 1 else-Auto-Sub-Marker-List)))))
+      (save-excursion
+        ;; want to iterate over all of the active markers in the marker
+        ;; list. This starts at the second entry in the marker list.
+        (setq marker-index 2)
+        (while (and (marker-position
+                     (car (nth marker-index
+                               else-Auto-Sub-Marker-List)))
+                    (<= marker-index (car else-Auto-Sub-Marker-List)))
+          (delete-region (marker-position
                           (car (nth marker-index
-                                    else-Auto-Sub-Marker-List))))
-              (insert (buffer-substring (marker-position
-                                         (car (nth 1
-                                                   else-Auto-Sub-Marker-List)))
-                                        (1- (marker-position
-                                             (cdr (nth 1
-                                                       else-Auto-Sub-Marker-List))))))
-              (setq marker-index (1+ marker-index))))))))
+                                    else-Auto-Sub-Marker-List)))
+                         (1- (marker-position
+                              (cdr (nth marker-index
+                                        else-Auto-Sub-Marker-List)))))
+          (goto-char (marker-position
+                      (car (nth marker-index
+                                else-Auto-Sub-Marker-List))))
+          (insert (buffer-substring (marker-position
+                                     (car (nth 1
+                                               else-Auto-Sub-Marker-List)))
+                                    (1- (marker-position
+                                         (cdr (nth 1
+                                                   else-Auto-Sub-Marker-List))))))
+          (setq marker-index (1+ marker-index)))))))
 
 (defun else-after-token ()
   "Test if string preceding point is a valid token."
@@ -481,35 +481,30 @@ Contains True or False (t or nil) and is indexed by character code")
       (setq match-scan (format "\\([^%s]+\\)\\|\\(^\\)"
                                (cdr (assoc else-Valid-Idents-ref
                                            Language-Specifics))))
-      (if (else-scan-for-match match-scan nil t)
-          (if (not (= (point) here))
-              (progn
-                ;; We have found a (potential) token string, have to make a
-                ;; small adjustment here for detected white-space. Note that no
-                ;; adjustment required if we matched the beginning of line (^)
-                ;; (that's why I used the \\( groupings)
-                (if (match-string 1)
-                    (forward-char))
-                (if (else-look-up (buffer-substring
-                                   (point)
-                                   here) ?t)
-                    (progn
-                      ;; We have a valid token, so save the start and end of the
-                      ;; text that was matched.
-                      (setq else-placeholder-start (point))
-                      (setq else-placeholder-end here)
-                      (setq else-definition-type ?t)
-                      ;; No duplication possible....
-                      (setq else-please-duplicate nil)
+      (when (else-scan-for-match match-scan nil t)
+        (when (not (= (point) here))
+          ;; We have found a (potential) token string, have to make a
+          ;; small adjustment here for detected white-space. Note that no
+          ;; adjustment required if we matched the beginning of line (^)
+          ;; (that's why I used the \\( groupings)
+          (when (match-string 1) (forward-char))
+          (when (else-look-up (buffer-substring (point) here) ?t)
+            ;; We have a valid token, so save the start and end of the
+            ;; text that was matched.
+            (setq else-placeholder-start (point))
+            (setq else-placeholder-end here)
+            (setq else-definition-type ?t)
+            ;; No duplication possible....
+            (setq else-please-duplicate nil)
 
-                      (setq else-definition-name (buffer-substring
-                                                  (point) here))
+            (setq else-definition-name (buffer-substring
+                                        (point) here))
 
-                      ;; Get the definition while we are here....
-                      (setq else-current-definition (else-look-up
-                                                     else-definition-name
-                                                     else-definition-type))
-                      (setq result t)))))))
+            ;; Get the definition while we are here....
+            (setq else-current-definition (else-look-up
+                                           else-definition-name
+                                           else-definition-type))
+            (setq result t)))))
     result))
 
 ;; The Placeholder and Token variables are obarrays of considerable
@@ -929,12 +924,10 @@ Argument PATH-NAME path to the file."
   "Delete every _line_ in the buffer containing a valid placeholder.
 Note the emphasis on _line_, so be careful :-)."
   (interactive)
-  (let ()
-    (progn
-      (save-excursion
-        (goto-char (point-min))
-        (while (not (= (point) (else-next-placeholder)))
-          (else-kill-placeholder nil t))))))
+  (save-excursion
+    (goto-char (point-min))
+    (while (not (= (point) (else-next-placeholder)))
+      (else-kill-placeholder nil t))))
 
 
 ;; Rip thru' the buffer (or narrowed region) and place comment characters on
@@ -1128,9 +1121,8 @@ Called upon detection of the 'DELETE' token in the template source file."
 (defun else-delete-entry (s)
   "Unintern or 'Delete' an entry S from `obarray'.
 This function is used as an argument to the mapatoms command."
-  (let ()
-    (if (not (unintern s obarray))
-        (message "Can't delete from obarray!"))))
+  (if (not (unintern s obarray))
+      (message "Can't delete from obarray!")))
 
 (defun else-delete-language-definition ()
   "Delete a language definition from the Global definitions.
@@ -1723,16 +1715,16 @@ template."
           ;; getting a alphabetically sorted list of the placeholder/token names
           ;; and then processing each of the definitions individually
           (setq sorted-names (else-return-sorted-list Placeholder))
-          (mapc '(lambda (element-name)
-                   (else-extract-a-placeholder
-                    (intern-soft (upcase element-name)
-                                 Placeholder))) sorted-names)
+          (mapc #'(lambda (element-name)
+                    (else-extract-a-placeholder
+                     (intern-soft (upcase element-name)
+                                  Placeholder))) sorted-names)
 
           (setq sorted-names (else-return-sorted-list Token))
-          (mapc '(lambda (element-name)
-                   (else-extract-a-token
-                    (intern-soft (upcase element-name)
-                                 Token))) sorted-names)
+          (mapc #'(lambda (element-name)
+                    (else-extract-a-token
+                     (intern-soft (upcase element-name)
+                                  Token))) sorted-names)
 
           ;; Restore the original language (assuming there was one)
           (if current-language
@@ -2190,8 +2182,7 @@ defun."
 ;;
 (defun else-get-body (element)
   "Extract the 'body' of the definition."
-  (let ()
-    (get element 'else-body-ref)))
+  (get element 'else-body-ref))
 
 ;;
 ;; Extract the descriptive text ie /DESCRIPTION="...."
@@ -2732,7 +2723,7 @@ what might have been there :-)."
 (defun else-menu-block-movement ()
   ;;  [Documentation]
   (interactive)
-  (let ()))
+  )
 
 ;;
 ;; Next line in the menu, wraps when moving past last line
@@ -2740,15 +2731,12 @@ what might have been there :-)."
 (defun else-menu-previous-line ()
   ;;  [Documentation]
   (interactive)
-  (let ()
-    (progn
-      (if (not (= (point) (point-min)))
-          (progn
-            (backward-char)
-            (beginning-of-line))
-        (progn
-          (goto-char (1- (point-max)))
-          (beginning-of-line))))))
+  (if (not (= (point) (point-min)))
+      (progn
+        (backward-char)
+        (beginning-of-line))
+    (goto-char (1- (point-max)))
+    (beginning-of-line)))
 
 ;;
 ;; Quit the menu pick list processing.
@@ -2756,9 +2744,8 @@ what might have been there :-)."
 (defun else-menu-quit ()
   "Quit from the menu pick list."
   (interactive)
-  (let ()
-    (setq else-selected-text nil)
-    (exit-recursive-edit)))
+  (setq else-selected-text nil)
+  (exit-recursive-edit))
 
 ;;
 ;; Next line in the menu, wraps when moving past last line
@@ -3617,9 +3604,9 @@ and return them as a list."
   (let ((sorted-list)
         (case-fold-search nil))
     ;; Put all of the names into a list
-    (mapatoms '(lambda (obarray-element)
-                 (push (get obarray-element 'else-original-name)
-                       sorted-list)) this-obarray)
+    (mapatoms #'(lambda (obarray-element)
+                  (push (get obarray-element 'else-original-name)
+                        sorted-list)) this-obarray)
 
     ;; Now sort the list alphabetically
     ;;(setq sorted-list (sort sorted-list 'string<))
@@ -3699,31 +3686,29 @@ Where FORMS is any sequence of Elisp commands i.e.
         (re-search-forward match-string search-limit t)))))
 
 (defun else-search-load-path (name &optional check-local-dir-first)
-  "Search load path for file 'name', returns path plus name.
+  "Search load path for file NAME and return path plus NAME.
 If 'check-local-dir-first' is t then it will check for the file in the
 'current' directory prior to searching the load path."
   (let ((search-path load-path)
         (found nil)
         (this-attempt))
-    (progn
-      (if check-local-dir-first
-          (progn
-            (setq this-attempt (expand-file-name
-                                (concat "./" name)))
-            (setq found (file-exists-p this-attempt))))
+    (when check-local-dir-first
+      (setq this-attempt (expand-file-name
+                          (concat "./" name)))
+      (setq found (file-exists-p this-attempt)))
 
-      (while (and search-path
-                  (not found))
-        (setq this-attempt (expand-file-name
-                            (concat (car search-path)
-                                    "/"
-                                    name)))
-        (setq found (file-exists-p this-attempt))
-        (setq search-path (cdr search-path)))
+    (while (and search-path
+                (not found))
+      (setq this-attempt (expand-file-name
+                          (concat (car search-path)
+                                  "/"
+                                  name)))
+      (setq found (file-exists-p this-attempt))
+      (setq search-path (cdr search-path)))
 
-      (if found
-          this-attempt
-        nil))))
+    (if found
+        this-attempt
+      nil)))
 
 
 (defun else-set-overlay-here ()
@@ -3817,17 +3802,16 @@ the hook function."
 ;; "local" to the buffer so as not to interfere with buffers that don't have
 ;; ELSE mode enabled.
 (defun else-setup-change-hooks ()
-  (let ()
-    (make-local-hook 'after-change-functions)
-    (make-local-hook 'before-change-functions)
-    (add-hook 'before-change-functions
-              'else-before-change
-              t
-              t)
-    (add-hook 'after-change-functions
-              'else-after-change
-              nil
-              t)))
+  (make-local-hook 'after-change-functions)
+  (make-local-hook 'before-change-functions)
+  (add-hook 'before-change-functions
+            'else-before-change
+            t
+            t)
+  (add-hook 'after-change-functions
+            'else-after-change
+            nil
+            t))
 
 (defun else-show-placeholder-names ()
   "Display names of all of the Placeholders in the current language template
@@ -3972,10 +3956,9 @@ The file is indicated by 'else-read-marker'"
 ;; If ARG contains enclosing quotes, then strip them off.
 ;;
 (defun else-strip-quotes (arg)
-  (let ()
-    (if (string= (substring arg 0 1) "\"")
-        (substring arg 1 (1- (length arg)))
-      arg)))
+  (if (string= (substring arg 0 1) "\"")
+      (substring arg 1 (1- (length arg)))
+    arg))
 
 ;; Called to provide a textual substitution of the current token or
 ;; placeholder with either a single line of text (because it was
@@ -4088,9 +4071,7 @@ The file is indicated by 'else-read-marker'"
 
 (defun else-summary ()
   (interactive)
-  (let ()
-    (progn
-      (message "s-elect, q-uit, n-ext line, p-revious line"))))
+  (message "s-elect, q-uit, n-ext line, p-revious line"))
 
 (defun else-toggle-direction ()
   "Toggle the value of the direction flag 'else-direction."
