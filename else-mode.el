@@ -110,9 +110,9 @@
 ;; issue will work either way.
 (unless (boundp 'undo-in-progress)
   (defvar undo-in-progress nil
-   "Indicate that an undo is in progress to before/after change fns.")
+    "Indicate that an undo is in progress to before/after change fns.")
   (defadvice undo-more (around else-undo-more activate compile)
-     (let ((undo-in-progress t)) ad-do-it)))
+    (let ((undo-in-progress t)) ad-do-it)))
 
 ;; The following constants define the offsets for the nth and nthcdr functions
 ;; into the data element which records each line of the 'body' of a
@@ -560,7 +560,7 @@ Contains True or False (t or nil) and is indexed by character code")
         (vert-dup)
         (valid-search)
         (action-struct)
-	(marker-index)
+        (marker-index)
         (sub-marker-counter)
         (sub-marker-counter-limit))
     (progn
@@ -830,7 +830,7 @@ Contains True or False (t or nil) and is indexed by character code")
                       ;; Position at the start of where the original placeholder
                       ;; was.
                       (setq this-pos (marker-position (car (nth marker-index
-                                                           else-Auto-Sub-Marker-List))))
+                                                                else-Auto-Sub-Marker-List))))
 
                       ;; Have to calculate the column number for the call to
                       ;; replicate....
@@ -974,7 +974,7 @@ Optional argument START-AT-POINT-MIN a minimum starting point."
     (setq err-msg
           (catch 'compile
             (if start-at-point-min
-              (goto-char (point-min)))
+                (goto-char (point-min)))
             (while (not (= (point) (point-max)))
               (progn
                 ;;Only look if the line isn't a comment line
@@ -1380,7 +1380,7 @@ Argument POSSIBLE-MATCHES ."
         ;; the menu list - this causes a blank line in the menu display. Get rid
         ;; of it.
         (if (= (elt menu-string (1- (length menu-string))) ?\n)
-          (aset menu-string (1- (length menu-string)) ?\ ))
+            (aset menu-string (1- (length menu-string)) ?\ ))
         ;; Set the selection item to nothing
         (setq else-selected-text nil)
 
@@ -1664,7 +1664,7 @@ denoted by else-placeholder-overlay."
 template."
   (interactive)
   (let ((current-language else-Current-Language)
-	(sorted-names))
+        (sorted-names))
     ;; Allow a bit of flexibility here, if the user is extracting in a buffer
     ;; that has language defined then operate on that language, otherwise
     ;; prompt the user for a language name and then operate on that language
@@ -2215,7 +2215,7 @@ defun."
         (intern name-string obarray-name))))
 
 (defun else-get-menu-entries (element)
-   "Create a list from the menu elements in this placeholder.  Note that if
+  "Create a list from the menu elements in this placeholder.  Note that if
 sub-elements are defined with menu elements, then there are options to follow or
 not follow individual elements in the menu list - but these options can be
 overridden by the 'else-follow-menus and 'else-nofollow-menus flags! By doing
@@ -2373,8 +2373,8 @@ auto-substitute placeholder."
   (interactive "i\nP")
   (let ((current-location (point))
         (loop-counter)
-	(is-auto-sub)
-	(here)
+        (is-auto-sub)
+        (here)
         (stop-loop))
     ;; Verify we are with a placeholder.
     (if (else-in-placeholder)
@@ -2964,11 +2964,11 @@ Keybindings:
         (progn
           (setq sub-length (car else-Auto-Sub-Marker-List))
           (while (> sub-length 0)
-             (set-marker (car (nth sub-length else-Auto-Sub-Marker-List))
-                         nil)
-             (set-marker (cdr (nth sub-length else-Auto-Sub-Marker-List))
-                         nil)
-             (setq sub-length (1- sub-length)))))
+            (set-marker (car (nth sub-length else-Auto-Sub-Marker-List))
+                        nil)
+            (set-marker (cdr (nth sub-length else-Auto-Sub-Marker-List))
+                        nil)
+            (setq sub-length (1- sub-length)))))
 
     (setq else-Auto-Sub-Active nil)
     (kill-local-variable 'else-Auto-Sub-Active)
@@ -3556,7 +3556,7 @@ Keybindings:
                      (insert (car separator-type))
                      (setq separator-type (cdr separator-type))
                      (if separator-type
-                       (newline)))))
+                         (newline)))))
              (newline)
              (indent-to cur-column)
              (insert (concat "[" else-definition-name "]"))
@@ -3841,8 +3841,8 @@ set, sort them alphabetically and display them in a temporary buffer."
         (list-index)
         (output-format))
     (if (not else-mode)
-      (progn
-        (error "ELSE mode not enabled for this buffer."))
+        (progn
+          (error "ELSE mode not enabled for this buffer."))
       (with-output-to-temp-buffer "*Available Placeholders*"
         ;; Put all of the placeholder names into an alphabetically sorted list
         (setq placeholder-list (else-return-sorted-list Placeholder))
@@ -3904,8 +3904,8 @@ set, sort them alphabetically and display them in a temporary buffer."
         (list-index)
         (output-format))
     (if (not else-mode)
-      (progn
-        (error "ELSE mode not enabled for this buffer."))
+        (progn
+          (error "ELSE mode not enabled for this buffer."))
       (with-output-to-temp-buffer "*Available Tokens*"
         ;; Put all of the token names into an alphabetically sorted list
         (setq token-list (else-return-sorted-list Token))
@@ -4310,7 +4310,7 @@ and else-previous-placeholder - this is code for VoiceCoder requirements."
 
 (defface else-placeholder-face
   '((((type tty) (class color)) (:foreground "green"))
-     (((class grayscale) (background light)) (:foreground "DimGray" :italic t))
+    (((class grayscale) (background light)) (:foreground "DimGray" :italic t))
     (((class grayscale) (background dark)) (:foreground "LightGray" :italic t))
     (((class color) (background light)) (:foreground "RosyBrown"))
     (((class color) (background dark)) (:foreground "LightSalmon"))
