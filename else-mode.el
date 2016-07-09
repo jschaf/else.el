@@ -84,13 +84,13 @@
 
 
 (defconst else-before-key "/BEFORE"
-  "association list key into the run-time action sequences.")
+  "Association list key into the run-time action sequences.")
 
 (defconst else-after-key "/AFTER"
-  "association list key into the run-time action sequences.")
+  "Association list key into the run-time action sequences.")
 
 (defconst else-oninsert-key "/ONINSERT"
-  "association list key into the run-time action sequences.")
+  "Association list key into the run-time action sequences.")
 
 (defconst else-Extract-Column 4)
 
@@ -249,7 +249,7 @@
 (defconst else-body-end 8)
 
 (defconst else-template-comment "^;;.*"
-  "Comment lines must start at the line beginning with ;;")
+  "Comment lines must start at the line beginning with ;;.")
 
 (defvar else-deleted-string   nil)      ; The last placeholder text that is
                                         ; currently being processed.
@@ -265,25 +265,26 @@
                                         ; optional [].
 
 (defvar else-placeholder-start 0
-  "Start position of the placeholder/token being processed")
+  "Start position of the placeholder/token being processed.")
 
 (defvar else-placeholder-end   0
-  "End position of the placeholder/token being processed")
+  "End position of the placeholder/token being processed.")
 
 (defvar else-definition-type nil
-  "Definition type of the element bounded by else-placeholder-start/end")
+  "Definition type of the element bounded by else-placeholder-start/end.")
 
 (defvar else-Auto-Sub-Active nil
-  "Used to determine if an auto-substitute string is Active")
+  "Used to determine if an auto-substitute string is Active.")
 
 (defvar else-Auto-Sub-Marker-List nil
   "A list of paired Auto Sub Markers, this list grows or shrinks as required.")
 
 (defvar else-Language-Definitions '(("Empty" . nil))
-  "alist containing all the language definitions.")
+  "Alist containing all the language definitions.")
 
 (defvar else-Current-Language nil
-  "Holds the Language Identification string for the current buffer ie \"Ada\"")
+  "Holds the Language Identification string for the current buffer.
+For example: \"Ada\".")
 
 (defvar else-menu-mode-map
   (let ((map (make-keymap)))
@@ -300,7 +301,7 @@
     (define-key map "?" 'else-summary)
     (define-key map "\r" 'else-menu-select)
     map )
-  "Local keymap for else-mode.")
+  "Local keymap for function ‘else-mode’.")
 
 (defvar else-mode-key-map
   (let ((mode-map (make-sparse-keymap))
@@ -318,17 +319,17 @@
     mode-map))
 
 (defvar else-selected-text nil
-  "string selected by the user when multiple choices in the LSE word function are
-available" )
+  "User selected string when LSE word function has multiple choices." )
 
 (defvar else-type-of-item-being-expanded ?p
-  "'type' of item being expanded ie either a placeholder or a token")
+  "The 'type' of item being expanded.
+For example, it might be either a placeholder or a token.")
 
 (defvar else-mode nil
-  "The minor mode flag")
+  "The minor mode flag.")
 
 (defvar else-current-definition nil
-  "Current definition as found by else-in-placeholder")
+  "Current definition as found by ‘else-in-placeholder’.")
 
 ;; The following variables need to be local to each buffer in which they are
 ;; used.
@@ -349,12 +350,11 @@ available" )
 (setq-default else-mode nil)
 
 (defvar Placeholder ()
-  "Array holding the `placeholder' tokens for the current language")
+  "Array holding the `placeholder' tokens for the current language.")
 (defvar Token ()
-  "Array holding the `token' tokens for the current language" )
+  "Array holding the `token' tokens for the current language." )
 (defvar Language-Specifics ()
-  "Structure that holds the language definition information for the current
-language")
+  "Structure for language definition info for current language.")
 
 (defvar Language-Self-Insert-Characters-Vector
   "Vector to look-up whether a character is 'self-insert'.
@@ -370,7 +370,7 @@ Contains True or False (t or nil) and is indexed by character code")
 
 
 (defconst else-character-vector-length 256
-  "Language character vectors length")
+  "Language character vectors length.")
 
 
 ;;; Now make these variables buffer local. At the moment, these are just buffer
@@ -517,7 +517,7 @@ Contains True or False (t or nil) and is indexed by character code")
 ;; don't bother initialising them until they are required. This routine is
 ;; called by the language loading procedures.
 (defun else-check-and-init-globals (language)
-  "If language doesn't exist, create a set of variables for it."
+  "If LANGUAGE doesn't exist, create a set of variables for it."
   (let ((result t))
     (if (not (assoc language else-Language-Definitions))
         (progn
@@ -761,7 +761,7 @@ Contains True or False (t or nil) and is indexed by character code")
                                   (progn
                                     ;; we need to grow the list
                                     (error
-                                     "growth of sub marker list not implemented")
+                                     "Growth of sub marker list not implemented")
                                     )
                                 (set-marker (car
                                              (nth sub-marker-counter
@@ -889,10 +889,11 @@ Contains True or False (t or nil) and is indexed by character code")
     (set-match-data data)))
 
 (defun else-check-language-file (path-name)
-  "Check if the file contains a fast load version and verify validity.
+  "Check if the file has a fast load version and verify validity.
 Validity checking entails the date stamps on the .esl file versus the time
-stamp on the .lse file. A warning is issued if the .esl version is younger than
-the .lse version ie the fast load version should be recompiled."
+stamp on the .lse file.  A warning is issued if the .esl version is younger than
+the .lse version ie the fast load version should be recompiled.
+Argument PATH-NAME path to the file."
   (let ((file-name)
         (split-name)
         (file-name-with-esl)
@@ -962,7 +963,8 @@ modern science."
 ;; "Compile" the language template definitions in the current buffer.
 ;; Processes from `point' to the end of the buffer.
 (defun else-compile-buffer (&optional start-at-point-min)
-  "Compile the language template definitions from 'point' to the end."
+  "Compile the language template definitions from 'point' to the end.
+Optional argument START-AT-POINT-MIN a minimum starting point."
   (interactive "P")
   (let ((command)
         (err-msg nil)
@@ -1007,7 +1009,8 @@ modern science."
 (defun else-compile-fast-load (language-file-name)
   "Make an Emacs Lisp loadable file from a standard language template file.
 The resulting file has a .esl extension as opposed to the .lse extension
-of a normal language template file."
+of a normal language template file.
+Argument LANGUAGE-FILE-NAME the file path to the language template file."
   (interactive "fName of language file:")
   (let ((file-ext-start)
         (compiled-file-name)
@@ -1071,10 +1074,10 @@ of a normal language template file."
                 (insert data))))))))
 
 ;;
-;; Delete either a "LANGUAGE", "PLACEHOLDER" or "TOKEN" definition.
-;; Called upon detection of the "DELETE" token in the template source file.
 ;;
 (defun else-delete-a-definition ()
+  "Delete either a 'LANGUAGE', 'PLACEHOLDER' or 'TOKEN' definition.
+Called upon detection of the 'DELETE' token in the template source file."
   (let ((obarray-name nil)
         (array-type nil)
         (language-name "")
@@ -1122,19 +1125,17 @@ of a normal language template file."
                       ;; settings for the buffer.
                       (else-establish-language current-language)))))))))
 
-;; Unintern or "Delete" an entry in `obarray'. This function is used as an
-;; argument to the mapatoms command.
 (defun else-delete-entry (s)
+  "Unintern or 'Delete' an entry S from `obarray'.
+This function is used as an argument to the mapatoms command."
   (let ()
-    (if (not (unintern s))
+    (if (not (unintern s obarray))
         (message "Can't delete from obarray!"))))
 
-;;
-;; Delete a language definition from the Global Template definitions.  Called
-;; when the sequence "DELETE LANGUAGE" has been parsed in the language template
-;; definition file.
-;;
 (defun else-delete-language-definition ()
+  "Delete a language definition from the Global definitions.
+Called when the sequence 'DELETE LANGUAGE' has been parsed in
+  the language template definition file."
   (let ((language-name "")
         (language-assoc)
         (current-language else-Current-Language))
@@ -1181,7 +1182,10 @@ of a normal language template file."
 ;; this placeholder type (language_name).
 ;;
 (defun else-delete-placeholder (&optional leave-spacing force dont-kill-empty-lines)
-  "Delete the placeholder at `point'. Clean up syntactically."
+  "Delete the placeholder at `point'.  Clean up syntactically.
+Optional argument LEAVE-SPACING leave extra spacing.
+Optional argument FORCE TODO.
+Optional argument DONT-KILL-EMPTY-LINES TODO."
   (interactive "i\nP")
   (let ((separator)
         (separator-region-end)
@@ -1195,7 +1199,7 @@ of a normal language template file."
     (catch 'problem
       (if (not else-mode)
           (progn
-            (error "ELSE mode not enabled.")
+            (error "ELSE mode not enabled")
             (throw 'problem nil)))
 
       ;; Check if we are in a valid placeholder and also that the detected
@@ -1324,9 +1328,11 @@ of a normal language template file."
             (error "Can't delete - mandatory entry required"))))))
 
 (defun else-derive-language-name-from-mode-name (this-mode-name)
-  "The mode name and the language name may be different i.e. Visual
+  "Derive language name from the mode name.
+The mode name and the language name may be different i.e. Visual
 Basic and Visual-Basic, so modularise the problem and place any
-customisations here."
+customisations here.
+Argument THIS-MODE-NAME current mode name."
   (let ((language-name this-mode-name))
     ;; Check to see if there is a translation or alternative naming
     ;; for the mode name i.e. in Emacs 22.1, the mode name for files
@@ -1357,7 +1363,8 @@ customisations here."
 ;; not called unless there is more than one possible match
 ;;
 (defun else-display-menu (possible-matches &optional momentary-only)
-  "Display menu of possible choices. Doubles as prompt display as well - yuk."
+  "Display menu of possible choices. Doubles as prompt display as well - yuk.
+Argument POSSIBLE-MATCHES ."
   (let ((my-buffer)
         (start-window (selected-window))
         (menu-string ""))
@@ -4337,7 +4344,6 @@ else-show-token-names"
 ;; make a unique copy for this buffer
 (make-variable-buffer-local 'else-placeholder-overlay)
 
-(provide 'else-mode)
 
 ;;; elsemode.el ends here
 ;; LocalWords:  elsemode Milliken dosuser peterm msg esl lse setq progn concat
@@ -4349,3 +4355,7 @@ else-show-token-names"
 ;; LocalWords:  setnu placeholder ONINSERT FSF ref zA NOFOLLOW ie Stefan elisp
 ;; LocalWords:  oninsert yuk vetted TOKENs Jun comps nofollow refs def pre defn
 ;; LocalWords:  ext DimGray LightGray RosyBrown LightSalmon
+
+(provide 'else-mode)
+
+;;; else-mode.el ends here
