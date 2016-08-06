@@ -3797,21 +3797,19 @@ the hook function."
             index-value
             t))))
 
-;; Set up the before and after change functions and add them to the
-;; appropriate change hooks. Note that the standard change hooks must be made
-;; "local" to the buffer so as not to interfere with buffers that don't have
-;; ELSE mode enabled.
 (defun else-setup-change-hooks ()
-  (make-local-hook 'after-change-functions)
-  (make-local-hook 'before-change-functions)
+  "Set up the before and after change functions and add them to
+  the appropriate change hooks. Note that the standard change
+  hooks must be made 'local' to the buffer so as not to interfere
+  with buffers that don't have ELSE mode enabled."
   (add-hook 'before-change-functions
             'else-before-change
             t
-            t)
+            'local)
   (add-hook 'after-change-functions
             'else-after-change
             nil
-            t))
+            'local))
 
 (defun else-show-placeholder-names ()
   "Display names of all of the Placeholders in the current language template
