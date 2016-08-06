@@ -101,8 +101,8 @@
 ;; Emacs. The following three variables are used in the XEmacs code. All XEmacs
 ;; code is differentiated using a 'cond' statement and the 'else-in-xemacs
 ;; variable setting.
-(defvar else-move-change nil)
-(defvar else-move-to-position nil)
+(defvar-local else-move-change nil)
+(defvar-local else-move-to-position nil)
 (defvar else-in-xemacs (integerp (string-match "XEmacs\\|Lucid" (emacs-version))))
 
 ;; Do some compatibility between XEmacs and FSF Emacs - hopefully can remove
@@ -251,16 +251,16 @@
 (defconst else-template-comment "^;;.*"
   "Comment lines must start at the line beginning with ;;.")
 
-(defvar else-deleted-string   nil)      ; The last placeholder text that is
+(defvar-local else-deleted-string   nil)      ; The last placeholder text that is
                                         ; currently being processed.
-(defvar else-definition-name  nil)      ; string of the definition being
+(defvar-local else-definition-name  nil)      ; string of the definition being
                                         ; processed i.e. identifier.
 (defvar else-fallback-text    nil)      ; The full original deleted text.
-(defvar else-deleted-column   0)        ; Column from which the deleted string
-(defvar else-please-duplicate nil)      ; t when the placeholder was followed
+(defvar-local else-deleted-column   0)        ; Column from which the deleted string
+(defvar-local else-please-duplicate nil)      ; t when the placeholder was followed
                                         ; by ellipses.
 
-(defvar else-Mandatory-Placeholder nil) ; Flag used to indicate if current
+(defvar-local else-Mandatory-Placeholder nil) ; Flag used to indicate if current
                                         ; placeholder is mandatory {} or
                                         ; optional [].
 
@@ -270,19 +270,19 @@
 (defvar else-placeholder-end   0
   "End position of the placeholder/token being processed.")
 
-(defvar else-definition-type nil
+(defvar-local else-definition-type nil
   "Definition type of the element bounded by else-placeholder-start/end.")
 
-(defvar else-Auto-Sub-Active nil
+(defvar-local else-Auto-Sub-Active nil
   "Used to determine if an auto-substitute string is Active.")
 
-(defvar else-Auto-Sub-Marker-List nil
+(defvar-local else-Auto-Sub-Marker-List nil
   "A list of paired Auto Sub Markers, this list grows or shrinks as required.")
 
 (defvar else-Language-Definitions '(("Empty" . nil))
   "Alist containing all the language definitions.")
 
-(defvar else-Current-Language nil
+(defvar-local else-Current-Language nil
   "Holds the Language Identification string for the current buffer.
 For example: \"Ada\".")
 
@@ -325,68 +325,48 @@ For example: \"Ada\".")
   "The 'type' of item being expanded.
 For example, it might be either a placeholder or a token.")
 
-(defvar else-mode nil
+(defvar-local else-mode nil
   "The minor mode flag.")
 
-(defvar else-current-definition nil
+(defvar-local else-current-definition nil
   "Current definition as found by ‘else-in-placeholder’.")
-
-;; The following variables need to be local to each buffer in which they are
-;; used.
-(make-variable-buffer-local 'else-Auto-Sub-Active)
-(make-variable-buffer-local 'else-Auto-Sub-Marker-List)
-(make-variable-buffer-local 'else-Current-Language)
-(make-variable-buffer-local 'else-mode)
-(make-variable-buffer-local 'else-move-change)
-(make-variable-buffer-local 'else-move-to-position)
-(make-variable-buffer-local 'else-current-definition)
-(make-variable-buffer-local 'else-please-duplicate)
-(make-variable-buffer-local 'else-deleted-column)
-(make-variable-buffer-local 'else-deleted-string)
-(make-variable-buffer-local 'else-definition-type)
-(make-variable-buffer-local 'else-definition-name)
-(make-variable-buffer-local 'else-Mandatory-Placeholder)
 
 (setq-default else-mode nil)
 
-(defvar Placeholder ()
+
+;; Now make these variables buffer local. At the moment, these are just buffer
+;; local copies that refer to the full language templates, ideally, we would
+;; want to offer the facility of being able to customise the templates of a
+;; language for each buffer ie in one program you might be doing a lot of case
+;; statements and in another buffer there may be more 'if' statements so the
+;; user may decide it would be nice to have two versions of the STATEMENT
+;; placeholder. This is currently not available but could easily be added. At
+;; the moment, change one and all buffers are affected.
+(defvar-local Placeholder ()
   "Array holding the `placeholder' tokens for the current language.")
-(defvar Token ()
+
+(defvar-local Token ()
   "Array holding the `token' tokens for the current language." )
-(defvar Language-Specifics ()
+
+(defvar-local Language-Specifics ()
   "Structure for language definition info for current language.")
 
-(defvar Language-Self-Insert-Characters-Vector
+(defvar-local Language-Self-Insert-Characters-Vector nil
   "Vector to look-up whether a character is 'self-insert'.
 Contains True or False (t or nil) and is indexed by character code")
 
-(defvar Language-Valid-Identifier-Characters-Vector
+(defvar-local Language-Valid-Identifier-Characters-Vector nil
   "Vector to look-up whether a character is a 'valid identifier'.
 Contains True or False (t or nil) and is indexed by character code")
 
-(defvar Language-Punctuation-Characters-Vector
+(defvar-local Language-Punctuation-Characters-Vector nil
   "Vector to look-up whether a character is a 'punctuation' character.
 Contains True or False (t or nil) and is indexed by character code")
-
 
 (defconst else-character-vector-length 256
   "Language character vectors length.")
 
 
-;;; Now make these variables buffer local. At the moment, these are just buffer
-;;; local copies that refer to the full language templates, ideally, we would
-;;; want to offer the facility of being able to customise the templates of a
-;;; language for each buffer ie in one program you might be doing a lot of case
-;;; statements and in another buffer there may be more 'if' statements so the
-;;; user may decide it would be nice to have two versions of the STATEMENT
-;;; placeholder. This is currently not available but could easily be added. At
-;;; the moment, change one and all buffers are affected.
-(make-variable-buffer-local 'Placeholder)
-(make-variable-buffer-local 'Token)
-(make-variable-buffer-local 'Language-Specifics)
-(make-variable-buffer-local 'Language-Self-Insert-Characters-Vector)
-(make-variable-buffer-local 'Language-Valid-Identifier-Characters-Vector)
-(make-variable-buffer-local 'Language-Punctuation-Characters-Vector)
 
 ;; The following variables are used purely for the fast save/load process
 ;; (else-compile-fast-load and else-restore).
@@ -408,7 +388,7 @@ Contains True or False (t or nil) and is indexed by character code")
 (defconst else-lse-ext "\.lse")
 (defconst else-esl-ext "\.esl")
 
-(defvar else-placeholder-overlay nil
+(defvar-local else-placeholder-overlay nil
   "Placeholder overlay is used by the Voice Coder modifications to ELSE.")
 
 ;; This is the after change function. Its primary purpose is to act in
@@ -4275,9 +4255,6 @@ precedence over all other settings dealing with this behaviour."
   :type 'boolean
   :group 'ELSE)
 
-(make-variable-buffer-local 'else-follow-menus)
-(make-variable-buffer-local 'else-nofollow-menus)
-
 (defcustom else-experimental-code-flag nil
   "Protect experimental regions of the code. Leave set to nil unless you are sure
 you can live with the consequences. Current behaviour being protected by the flag
@@ -4317,12 +4294,6 @@ else-show-token-names"
   this alist first before checking the mode-name variable."
   :type '(repeat (cons string string))
   :group 'ELSE)
-
-
-
-;; make a unique copy for this buffer
-(make-variable-buffer-local 'else-placeholder-overlay)
-
 
 ;;; elsemode.el ends here
 ;; LocalWords:  elsemode Milliken dosuser peterm msg esl lse setq progn concat
