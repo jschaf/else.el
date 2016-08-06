@@ -42,9 +42,11 @@
 ;; Only attempt expansion of token abbreviations if the expand-a-word
 ;; package is available.
 
-;; To allow partial expansion/recognition of tokens, the expand-a-word
-;; function is required.
-(defvar else-expand-a-word-available nil)
+
+(defvar else-expand-a-word-available nil
+  "To allow partial expansion/recognition of tokens, the
+expand-a-word function is required.")
+
 (condition-case nil
     (progn
       (require 'expand-a-word)
@@ -251,18 +253,24 @@
 (defconst else-template-comment "^;;.*"
   "Comment lines must start at the line beginning with ;;.")
 
-(defvar-local else-deleted-string   nil)      ; The last placeholder text that is
-                                        ; currently being processed.
-(defvar-local else-definition-name  nil)      ; string of the definition being
-                                        ; processed i.e. identifier.
-(defvar else-fallback-text    nil)      ; The full original deleted text.
-(defvar-local else-deleted-column   0)        ; Column from which the deleted string
-(defvar-local else-please-duplicate nil)      ; t when the placeholder was followed
-                                        ; by ellipses.
+(defvar-local else-deleted-string nil
+  "The last placeholder text that is currently being processed.")
 
-(defvar-local else-Mandatory-Placeholder nil) ; Flag used to indicate if current
-                                        ; placeholder is mandatory {} or
-                                        ; optional [].
+(defvar-local else-definition-name nil
+  "String of the definition being processed i.e. an identifier.")
+
+(defvar else-fallback-text nil
+  "The full original deleted text.")
+
+(defvar-local else-deleted-column 0
+  "Column from which the deleted string.")
+
+(defvar-local else-please-duplicate nil
+  "t when the placeholder was followed by ellipses.")
+
+(defvar-local else-Mandatory-Placeholder nil
+  "Flag used to indicate if current placeholder is mandatory {}
+  or optional [].")
 
 (defvar else-placeholder-start 0
   "Start position of the placeholder/token being processed.")
@@ -371,19 +379,22 @@ Contains True or False (t or nil) and is indexed by character code")
 ;; The following variables are used purely for the fast save/load process
 ;; (else-compile-fast-load and else-restore).
 
-;; This variable is used to communicate the "type" of symbols being processed
-;; during an ELSE compile for fast loading operation ie else-compile-fast-load
-;; and else-store-element use this variable to communicate what the element type
-;; that is being "stored". This is only necessary because the mapatoms process
-;; doesn't allow more that the one argument to the called routine.
-(defvar else-type-of-symbols ?p)
 
-;; This is the marker that tracks the "read" process used by
-;; else-compile-fast-load and else-restore. We use a marker into the restore
-;; file because the 'read' function automatically increments the marker as it
-;; reads each line. Again, the variable is only required to be global because of
-;; the use of 'mapatoms'.
-(defvar else-read-marker nil)
+(defvar else-type-of-symbols ?p
+  "This variable is used to communicate the type of symbols being
+processed during an ELSE compile for fast loading operation ie
+else-compile-fast-load and else-store-element use this variable
+to communicate what the element type that is being
+\"stored\". This is only necessary because the mapatoms process
+doesn't allow more that the one argument to the called routine.")
+
+
+(defvar else-read-marker nil
+  "This is the marker that tracks the read process used by
+else-compile-fast-load and else-restore. We use a marker into the
+restore file because the 'read' function automatically increments
+the marker as it reads each line. Again, the variable is only
+required to be global because of the use of 'mapatoms'.")
 
 (defconst else-lse-ext "\.lse")
 (defconst else-esl-ext "\.esl")
