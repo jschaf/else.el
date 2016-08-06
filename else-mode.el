@@ -32,6 +32,108 @@
 
 ;;; Code:
 
+(defgroup ELSE nil
+  "Custom variables for Emacs Language Sensitive Editor"
+  :tag "Emacs LSE"
+  :prefix "else"
+  :group 'tools)
+
+(defcustom else-prompt-time 3
+  "Prompter Screen display time in seconds"
+  :type 'integer
+  :group 'ELSE)
+
+(defcustom else-kill-proceed-to-next-placeholder nil
+  "Should else-kill-placeholder goto next placeholder after a kill or not"
+  :type 'boolean
+  :group 'ELSE)
+
+(defcustom else-set-lineno nil
+  "Turn line numbering in the Menu buffer on or off. Requires setnu.el."
+  :type 'boolean
+  :group 'ELSE)
+
+(defcustom else-move-and-execute nil
+  "If set, then if a command fails then a movement-<execute> pair is assumed
+where <execute> is the requested operation and the movement is determined by the
+else-direction flag - note that the 'command' is currently restricted to expand
+and kill operations only."
+  :type 'boolean
+  :group 'ELSE)
+
+(defcustom else-direction t
+  "If expand-or-move is enabled, this flag determines the direction of movement
+   on  - next placeholder
+   off - previous placeholder"
+  :type 'boolean
+  :group 'ELSE)
+
+(defcustom else-only-proceed-within-window t
+  "Move after a kill only if the next placeholder is visible in the current window.
+This flag controls jumps when they are part of a composite action by ELSE
+i.e. in kill-placeholder, if the kill-proceed flags is set then this flag
+allows the move to the next placeholder only if it is visible in the current
+window."
+  :type 'boolean
+  :group 'ELSE)
+
+(defcustom else-follow-menus nil
+  "If true then menu definitions are 'followed' or expanded until no sub-entry
+menu is found and all are combined into a single menu selection
+display at the 'top level'. If nil, then menu's are not expanded and
+the user has to traverse sub-menu entries (useful when combining
+menu's leads to huge menu selections)."
+  :type 'boolean
+  :group 'ELSE)
+
+(defcustom else-nofollow-menus nil
+  "If true then menu definitions are *not* 'followed'. If nil,
+'else-follow-menus and then /NOFOLLOW or /FOLLOW attributes are tested to
+determine the behaviour of menu displays. If set to t then this flag has
+precedence over all other settings dealing with this behaviour."
+  :type 'boolean
+  :group 'ELSE)
+
+(defcustom else-experimental-code-flag nil
+  "Protect experimental regions of the code. Leave set to nil unless you are sure
+you can live with the consequences. Current behaviour being protected by the flag
+is:
+1. Creating an overlay for the last placeholder visited by else-next-placeholder
+and else-previous-placeholder - this is code for VoiceCoder requirements."
+  :type 'boolean
+  :group 'ELSE)
+
+(defface else-placeholder-face
+  '((((type tty) (class color)) (:foreground "green"))
+    (((class grayscale) (background light)) (:foreground "DimGray" :italic t))
+    (((class grayscale) (background dark)) (:foreground "LightGray" :italic t))
+    (((class color) (background light)) (:foreground "RosyBrown"))
+    (((class color) (background dark)) (:foreground "LightSalmon"))
+    (t (:italic t)))
+  "ELSE mode face used for placeholder strings."
+  :group 'ELSE)
+
+(defcustom else-menu-display-functions nil
+  "A hook by which functions communicate their interest in menu
+selections when ELSE moves into a placeholder that is a menu
+placeholder."
+  :type '(repeat (cons string symbol))
+  :group 'ELSE)
+
+(defcustom else-ignore-case-in-name-sorts t
+  "Ignore case (t) in sorting token names for display using
+else-show-token-names"
+  :type 'boolean
+  :group 'ELSE)
+
+(defcustom else-Alternate-Mode-Names '(("C/l" . "C") ("C++/l" . "C++"))
+  "With Emacs 22.1 we started to see 'mixed' mode names such as C/l
+  for C extension files. This variable allows users to add their own
+  translations - else-derive-language-name-from-mode-name will look in
+  this alist first before checking the mode-name variable."
+  :type '(repeat (cons string string))
+  :group 'ELSE)
+
 ;; This package provides line-numbering to the menu buffer (if enabled - see
 ;; else-enable-lineno custom variable). Encase the conditional load within an
 ;; error handling struct so that ELSE doesn't blow up on loading.
@@ -4145,108 +4247,6 @@ second line of the placeholder being used."
       (insert text-being-wrapped)
       (setq end-region (point-marker))
       (indent-region start-region end-region nil))))
-
-(defgroup ELSE nil
-  "Custom variables for Emacs Language Sensitive Editor"
-  :tag "Emacs LSE"
-  :prefix "else"
-  :group 'tools)
-
-(defcustom else-prompt-time 3
-  "Prompter Screen display time in seconds"
-  :type 'integer
-  :group 'ELSE)
-
-(defcustom else-kill-proceed-to-next-placeholder nil
-  "Should else-kill-placeholder goto next placeholder after a kill or not"
-  :type 'boolean
-  :group 'ELSE)
-
-(defcustom else-set-lineno nil
-  "Turn line numbering in the Menu buffer on or off. Requires setnu.el."
-  :type 'boolean
-  :group 'ELSE)
-
-(defcustom else-move-and-execute nil
-  "If set, then if a command fails then a movement-<execute> pair is assumed
-where <execute> is the requested operation and the movement is determined by the
-else-direction flag - note that the 'command' is currently restricted to expand
-and kill operations only."
-  :type 'boolean
-  :group 'ELSE)
-
-(defcustom else-direction t
-  "If expand-or-move is enabled, this flag determines the direction of movement
-   on  - next placeholder
-   off - previous placeholder"
-  :type 'boolean
-  :group 'ELSE)
-
-(defcustom else-only-proceed-within-window t
-  "Move after a kill only if the next placeholder is visible in the current window.
-This flag controls jumps when they are part of a composite action by ELSE
-i.e. in kill-placeholder, if the kill-proceed flags is set then this flag
-allows the move to the next placeholder only if it is visible in the current
-window."
-  :type 'boolean
-  :group 'ELSE)
-
-(defcustom else-follow-menus nil
-  "If true then menu definitions are 'followed' or expanded until no sub-entry
-menu is found and all are combined into a single menu selection
-display at the 'top level'. If nil, then menu's are not expanded and
-the user has to traverse sub-menu entries (useful when combining
-menu's leads to huge menu selections)."
-  :type 'boolean
-  :group 'ELSE)
-
-(defcustom else-nofollow-menus nil
-  "If true then menu definitions are *not* 'followed'. If nil,
-'else-follow-menus and then /NOFOLLOW or /FOLLOW attributes are tested to
-determine the behaviour of menu displays. If set to t then this flag has
-precedence over all other settings dealing with this behaviour."
-  :type 'boolean
-  :group 'ELSE)
-
-(defcustom else-experimental-code-flag nil
-  "Protect experimental regions of the code. Leave set to nil unless you are sure
-you can live with the consequences. Current behaviour being protected by the flag
-is:
-1. Creating an overlay for the last placeholder visited by else-next-placeholder
-and else-previous-placeholder - this is code for VoiceCoder requirements."
-  :type 'boolean
-  :group 'ELSE)
-
-(defface else-placeholder-face
-  '((((type tty) (class color)) (:foreground "green"))
-    (((class grayscale) (background light)) (:foreground "DimGray" :italic t))
-    (((class grayscale) (background dark)) (:foreground "LightGray" :italic t))
-    (((class color) (background light)) (:foreground "RosyBrown"))
-    (((class color) (background dark)) (:foreground "LightSalmon"))
-    (t (:italic t)))
-  "ELSE mode face used for placeholder strings."
-  :group 'ELSE)
-
-(defcustom else-menu-display-functions nil
-  "A hook by which functions communicate their interest in menu
-selections when ELSE moves into a placeholder that is a menu
-placeholder."
-  :type '(repeat (cons string symbol))
-  :group 'ELSE)
-
-(defcustom else-ignore-case-in-name-sorts t
-  "Ignore case (t) in sorting token names for display using
-else-show-token-names"
-  :type 'boolean
-  :group 'ELSE)
-
-(defcustom else-Alternate-Mode-Names '(("C/l" . "C") ("C++/l" . "C++"))
-  "With Emacs 22.1 we started to see 'mixed' mode names such as C/l
-  for C extension files. This variable allows users to add their own
-  translations - else-derive-language-name-from-mode-name will look in
-  this alist first before checking the mode-name variable."
-  :type '(repeat (cons string string))
-  :group 'ELSE)
 
 (provide 'else-mode)
 
