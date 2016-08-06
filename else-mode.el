@@ -530,15 +530,16 @@ required to be global because of the use of 'mapatoms'.")
                  else-Language-Definitions))))
     result))
 
-;;
-;; Function that runs as part of the before change functions. Its main job is
-;; to determine whether the command is a "self-insert" and if so, whether the
-;; cursor is within a placeholder, if these conditions are true then it must
-;; delete the placeholder before allowing the command to proceed. It also
-;; checks whether the placeholder is part of an auto-substitute pairing and if
-;; so, sets up the appropriate global variables for use by the after change
-;; function.
+
 (defun else-before-change (begin end)
+  "Function that runs as part of the before change functions. Its
+main job is to determine whether the command is a \"self-insert\"
+and if so, whether the cursor is within a placeholder, if these
+conditions are true then it must delete the placeholder before
+allowing the command to proceed. It also checks whether the
+placeholder is part of an auto-substitute pairing and if so, sets
+up the appropriate global variables for use by the after change
+function."
   (let ((data (match-data))
         (is-auto-sub)
         (this-pos)
@@ -909,11 +910,10 @@ Argument PATH-NAME path to the file."
               (message "%s.esl is older than %s.lse"
                        file-name file-name))))))
 
-;; Clean up (delete) all lines that contain placeholders. This would be the
-;; final step after all coding is complete.
 (defun else-cleanup-placeholders ()
-  "Delete every _line_ in the buffer containing a valid placeholder.
-Note the emphasis on _line_, so be careful :-)."
+  "Delete every line in the buffer containing a valid placeholder.
+Note the emphasis on line, so be careful.  This is the final step
+after all coding is complete."
   (interactive)
   (save-excursion
     (goto-char (point-min))
@@ -921,13 +921,8 @@ Note the emphasis on _line_, so be careful :-)."
       (else-kill-placeholder nil t))))
 
 
-;; Rip thru' the buffer (or narrowed region) and place comment characters on
-;; each line that has a valid placeholder. Use the 'comment-region function, so
-;; end comments will be placed as well.
 (defun else-comment-placeholders ()
-  "Comments out every line in the buffer containing a valid placeholder.
-This function uses the 'comment-region' function to achieve this miracle of
-modern science."
+  "Comment out every line in the buffer containing a valid placeholder."
   (interactive)
   (let ((region-start)
         (region-end))
@@ -943,9 +938,7 @@ modern science."
             (comment-region  region-start region-end)
             (end-of-line)))))))
 
-;;
-;; "Compile" the language template definitions in the current buffer.
-;; Processes from `point' to the end of the buffer.
+
 (defun else-compile-buffer (&optional start-at-point-min)
   "Compile the language template definitions from 'point' to the end.
 Optional argument START-AT-POINT-MIN a minimum starting point."
@@ -1057,8 +1050,6 @@ Argument LANGUAGE-FILE-NAME the file path to the language template file."
                 (call-interactively 'comment-dwim)
                 (insert data))))))))
 
-;;
-;;
 (defun else-delete-a-definition ()
   "Delete either a 'LANGUAGE', 'PLACEHOLDER' or 'TOKEN' definition.
 Called upon detection of the 'DELETE' token in the template source file."
@@ -1154,21 +1145,21 @@ Called when the sequence 'DELETE LANGUAGE' has been parsed in
       ;; language settings for the buffer.
       (else-establish-language current-language))))
 
-;;
-;; Delete or "Kill" the placeholder in which `point' resides. The 'force' option
-;; is added because it is possible for else-mode to want to kill a placeholder
-;; and it really means it wants to - this situation arises when creating new
-;; language templates and the second /LANGUAGE="{language_name}" has been
-;; defined as a AUTO-SUBSTITUTE - in this case the else-before-change function
-;; really does want to kill the second occurrence but we really do want to keep
-;; the definition as a mandatory just in case the user doesn't want to define
-;; this placeholder type (language_name).
-;;
 (defun else-delete-placeholder (&optional leave-spacing force dont-kill-empty-lines)
   "Delete the placeholder at `point'.  Clean up syntactically.
-Optional argument LEAVE-SPACING leave extra spacing.
-Optional argument FORCE TODO.
-Optional argument DONT-KILL-EMPTY-LINES TODO."
+
+LEAVE-SPACING leaves extra spacing.
+
+FORCE exists because it is possible for `else-mode' to want to
+kill a placeholder and it really means it wants to - this
+situation arises when creating new language templates and the
+second /LANGUAGE=\"{language_name}\" has been defined as a
+AUTO-SUBSTITUTE - in this case the else-before-change function
+really does want to kill the second occurrence but we really do
+want to keep the definition as a mandatory just in case the user
+doesn't want to define this placeholder type (language_name).
+
+DONT-KILL-EMPTY-LINES preserves empty lines."
   (interactive "i\nP")
   (let ((separator)
         (separator-region-end)
@@ -1341,13 +1332,11 @@ Argument THIS-MODE-NAME current mode name."
 
 
 
-;;
-;; Display the list of possible matches for the expand-a-word function, it is
-;; not called unless there is more than one possible match
-;;
 (defun else-display-menu (possible-matches &optional momentary-only)
-  "Display menu of possible choices. Doubles as prompt display as well - yuk.
-Argument POSSIBLE-MATCHES ."
+  "Display menu of possible choices for expand-a-word function.
+  It is not called unless there is more than one possible match.
+Doubles as prompt display as well - yuk.  Argument
+POSSIBLE-MATCHES ."
   (let ((my-buffer)
         (start-window (selected-window))
         (menu-string ""))
@@ -1463,12 +1452,11 @@ it complies with the else naming conventions ie .esl"
     ;; Clean up the output buffer.
     (kill-buffer language-output-buffer)))
 
-;;
-;; Make sure that all key-bindings that bind to the expansion command are
-;; echoed in the menu selection keymap ie the user doesn't have to move his
-;; fingers from the command that caused a menu pick list to be displayed.
-;;
 (defun else-enable-dups (map command-to-search-out replacement-command)
+  "Make sure that all key-bindings that bind to the expansion
+command are echoed in the menu selection keymap ie the user
+doesn't have to move his fingers from the command that caused a
+menu pick list to be displayed."
   (let (abc)
     (setq abc (where-is-internal command-to-search-out))
     (while abc
@@ -1476,11 +1464,8 @@ it complies with the else naming conventions ie .esl"
         (define-key map (car abc) replacement-command)
         (setq abc (cdr abc))))))
 
-;;
-;; Set the local buffer variables to the appropriate language definition
-;; templates.
 (defun else-establish-language (language-name)
-  "Set language template set 'language-name as the current template
+  "Set language template set 'language-name as the current language defintion template
 set for this buffer."
   (let ((language-assoc)
         (result nil))
@@ -1541,18 +1526,17 @@ denoted by else-placeholder-overlay."
         ;; There is no overlay defined
         ))))
 
-;;
-;; Function name is a misnomer, this routine is the general start point for
-;; expanding either a placeholder or a token.
-;;
 (defun else-expand-placeholder ()
-  "Expand the placeholder or token located at `point'."
+  "Start point to expand the placeholder or token located at `point'.
+
+This function name is a misnomer, this routine is the general start
+point for expanding either a placeholder or a token."
   (interactive)
   (let ((here (point)))
     (catch 'problem
       (if (not else-mode)
           (progn
-            (error "ELSE mode not enabled.")
+            (error "ELSE mode not enabled")
             (throw 'problem nil)))
 
       ;; Reset the definition type and then work out if there is a valid
@@ -1720,11 +1704,11 @@ template."
           ;; Restore the original language (assuming there was one)
           (if current-language
               (else-establish-language current-language))))))
-;;
-;; Extract an individual placeholder definition. (non-interactive form - see
-;; else-extract-placeholder).
-;;
+
 (defun else-extract-a-placeholder (placeholder-definition)
+  "Extract an individual placeholder definition.
+This function is a non-interactive form.  See
+else-extract-placeholder for interactive use."
   (let ((selected-definition placeholder-definition)
         (name)
         (temp)
@@ -1836,11 +1820,10 @@ template."
     (newline)
     (newline)))
 
-;;
-;; Extract an individual token definition. (non-interactive form - see
-;; else-extract-token).
-;;
 (defun else-extract-a-token (token-definition)
+  "Extract an individual token definition.
+This function is a non-interactive form.  See else-extract-token
+for interactive use."
   (let ((selected-definition token-definition)
         (temp)
         (body)
@@ -1896,34 +1879,38 @@ template."
     (newline)
     (newline)))
 
-;; This routine assumes that it has been called after a regular expression match
-;; that indicates a line from the body of a definition has been found
-;; ie. \".*\".  The entry for the body form can be of the form " text " with an
-;; optional trailer(s) of /TOKEN or /PLACEHOLDER. If the text is meant for
-;; substitution i.e. it is not a menu or terminal entry prompt, then we wish to
-;; also record indentation information. The algorithm that calculates the number
-;; of indents for each line makes an assumption that the first line that is
-;; indented establishes a "base" indent level and any subsequent lines have
-;; their spacing compared with this count. Therefore, this routine (since it
-;; acts on a single line at a time) must take an argument of any current indent
-;; level information that may be in force and conversely, provide any indent
-;; information that it "discovers" i.e. if there is not indent level currently
-;; in force then if the current line contains indent information, that
-;; information must be returned to the caller.
-;;
-;; Further processing is made easier if there are three elements in each 'body'
-;; entry, so start the definition off with nil for all three elements and then
-;; replace them as needed. The order is /PLACEHOLDER or /TOKEN, indentation and
-;; then "any text". It assumes that the match-data from the "body" search string
-;; is still valid!
-;;
-;; 28-Jun-2002: Found a problem when attempting to define bodies that are purely
-;; textual in nature and the user doesn't want the indentation rules to be
-;; used i.e. definition of a file header with text lines that are heavily
-;; indented. Take the (obvious?) approach and use some special character ('@' in
-;; this case to denote 'hard' spaces.
-;;
 (defun else-extract-body (indent-level-size)
+"This routine assumes that it has been called after a regular
+expression match that indicates a line from the body of a
+definition has been found ie. \".*\".  The entry for the body
+form can be of the form \" text \" with an optional trailer(s) of
+/TOKEN or /PLACEHOLDER. If the text is meant for substitution
+i.e. it is not a menu or terminal entry prompt, then we wish to
+also record indentation information. The algorithm that
+calculates the number of indents for each line makes an
+assumption that the first line that is indented establishes a
+\"base\" indent level and any subsequent lines have their spacing
+compared with this count. Therefore, this routine (since it acts
+on a single line at a time) must take an argument of any current
+indent level information that may be in force and conversely,
+provide any indent information that it \"discovers\" i.e. if
+there is not indent level currently in force then if the current
+line contains indent information, that information must be
+returned to the caller.
+
+Further processing is made easier if there are three elements in
+each 'body' entry, so start the definition off with nil for all
+three elements and then replace them as needed. The order is
+/PLACEHOLDER or /TOKEN, indentation and then \"any text\". It
+assumes that the match-data from the \"body\" search string is
+still valid!
+
+28-Jun-2002: Found a problem when attempting to define bodies
+that are purely textual in nature and the user doesn't want the
+indentation rules to be used i.e. definition of a file header
+with text lines that are heavily indented. Take the (obvious?)
+approach and use some special character ('@' in this case to
+denote 'hard' spaces."
   (let ((local-list (list nil 0 nil t))
         (this-line nil)
         (this-indent-size)
@@ -2049,11 +2036,9 @@ template."
 
     result))
 
-;;
-;; Extract the "duplication" information from the template definition. Assumes
-;; that the match-data information is valid!
-;;
 (defun else-extract-duplication-info ()
+  "Extract the \"duplication\" information from the template
+definition. Assumes that the match-data information is valid!"
   (let ((this-line))
     (setq this-line
           (else-strip-quotes (match-string else-body-command-2)))
@@ -2065,9 +2050,7 @@ template."
            ?h)
           (t
            (throw 'compile "illegal duplication type")))))
-;;
-;; Interactive command to extract an individual placeholder definition.
-;;
+
 (defun else-extract-placeholder ()
   "Extract the definition of a placeholder into the buffer at point."
   (interactive)
@@ -2124,11 +2107,8 @@ defun."
                 (setq temp
                       (assq-delete-all (car tmp) temp)))))))))
 
-;;
-;; Interactive command to extract and individual token definition.
-;;
 (defun else-extract-token ()
-  "Extract the definition of a token into the buffer at point."
+  "Extract the an individual token definition into the buffer at point."
   (interactive)
   (let ((selected-definition)
         (temp completion-ignore-case)
@@ -2153,12 +2133,9 @@ defun."
           (if current-language
               (else-establish-language current-language))))))
 
-;;
-;; Extract the "type" information of a placeholder ie it is either a MENU,
-;; TERMINAL or NONTERMINAL definition.
-;;
 (defun else-extract-type-info ()
-  "Parse the /TYPE attribute of the definition"
+  "Parse the /TYPE attribute of the definition.
+It will be one of MENU, TERMINAL, or NONTERMINAL definition."
   (let ((this-match))
     (setq this-match (else-strip-quotes (match-string else-body-command-2)))
     (cond ((string= this-match "MENU")
@@ -2168,27 +2145,20 @@ defun."
           ((string= this-match "NONTERMINAL")
            ?n)
           (t (throw 'compile "illegal TYPE value")))))
-;;
-;; Get the "body" of a definition. This is a list of "strings".
-;;
+
 (defun else-get-body (element)
-  "Extract the 'body' of the definition."
+  "Extract the 'body' of the definition.
+This is a list of strings."
   (get element 'else-body-ref))
 
-;;
-;; Extract the descriptive text ie /DESCRIPTION="...."
-;;
 (defun else-get-description (name type)
   "Extract the /DESCRIPTION attribute"
   (let ((place-def (else-look-up name type)))
     (if place-def
         (get place-def 'else-description-ref))))
 
-;;
-;; Get a definition from either the Placeholder or Token definition array
-;;
 (defun else-get-entry (name-string type)
-  "Get a definition from either the Placeholder or Token definition set"
+  "Get a definition from either the Placeholder or Token definition array."
   (let ((obarray-name nil))
     (cond ((char-equal type ?t) (setq obarray-name Token))
           ((char-equal type ?p) (setq obarray-name Placeholder)))
@@ -2437,9 +2407,6 @@ auto-substitute placeholder."
 
             (else-kill-placeholder))))))
 
-;;
-;; Load a template definition file and "compile" it.
-;;
 (defun else-load-template ()
   "Load a language definition file and compile it."
   (let ((lang-def-buffer)
@@ -2708,19 +2675,13 @@ what might have been there :-)."
     (point)))
 
 
-;;
-;; Block out forward and backward char motion.
-;;
 (defun else-menu-block-movement ()
-  ;;  [Documentation]
+  "Block out forward and backward char motion."
   (interactive)
   )
 
-;;
-;; Next line in the menu, wraps when moving past last line
-;;
 (defun else-menu-previous-line ()
-  ;;  [Documentation]
+  "Next line in the menu, wraps when moving past last line"
   (interactive)
   (if (not (= (point) (point-min)))
       (progn
@@ -2729,20 +2690,14 @@ what might have been there :-)."
     (goto-char (1- (point-max)))
     (beginning-of-line)))
 
-;;
-;; Quit the menu pick list processing.
-;;
 (defun else-menu-quit ()
   "Quit from the menu pick list."
   (interactive)
   (setq else-selected-text nil)
   (exit-recursive-edit))
 
-;;
-;; Next line in the menu, wraps when moving past last line
-;;
 (defun else-menu-next-line (&optional n)
-  ;;  [Documentation]
+  "Next line in the menu, wraps when moving past last line"
   (interactive "p")
   (let ((count (or n 1)))
     (progn
@@ -2778,9 +2733,6 @@ description text etc"
              (setq result (substring menu-text 1 (1- (length menu-text))))))
       result)))
 
-;;
-;; Select the pick item at `point'.
-;;
 (defun else-menu-select ()
   "Select the menu pick item at `point'."
   (interactive)
@@ -2931,11 +2883,9 @@ Keybindings:
       ;; Return the result to the caller
       did-it-work)))
 
-;;
-;; Do a clean up. Consists of deleting buffer local variables and removing
-;; functions from various change hooks.
-;;
 (defun else-mode-clean-up ()
+  "Do a clean up.  Consists of deleting buffer local variables
+and removing functions from various change hooks."
   (let ((sub-length))
     ;; Set the auto sub marker list to point to nowhere
     (if else-Auto-Sub-Marker-List
@@ -3198,12 +3148,10 @@ Keybindings:
            (message "%s" (error-message-string err)))))
     result))
 
-;;
-;; This routines reads a placeholder/token definition from the current buffer,
-;; it assumes that the match-data contains a successful result of searching
-;; for a definition command sequence.
-;;
 (defun else-read-a-definition ()
+  "This routines reads a placeholder/token definition from the current buffer,
+it assumes that the match-data contains a successful result of
+searching for a definition command sequence."
   (let ((definition-type nil)
         (definition-complete nil)
         (definition-name)
@@ -3378,11 +3326,8 @@ Keybindings:
           ;; language settings for the buffer.
           (else-establish-language current-language)))))
 
-;;
-;; Read or process the language definition of a template language.
-;;
 (defun else-read-language-definition ()
-  "Parse a language definition statement."
+  "Parse a language definition statement of a template language."
   (let ((language-name "")
         (current-language else-Current-Language)
         (definition-complete nil)
@@ -3486,23 +3431,21 @@ Keybindings:
       ;; language settings for the buffer.
       (else-establish-language current-language))))
 
-;; This routine is called after the process has defined a definition which
-;; should replace the placeholder/token being replaced. It assumes that the
-;; string being expanded has been deleted and placed into the
-;; else-deleted-string variable.
-;;
-;; Add some basic code here that makes sure Context_dependent work better!
-;; ie
-;; if <<there is nothing else preceding the placeholder>> AND
-;;    <<we can locate a separator string immediately preceding>> then
-;;    Vertical substitution is appropriate
-;; else
-;;    Perform Horizontal substitution
-;; end if
-;;
-(defun else-replicate-placeholder-string (duplication-type
-                                          indent-column
-                                          element-def)
+(defun else-replicate-placeholder-string (duplication-type indent-column element-def)
+  "This routine is called after the process has defined a
+definition which should replace the placeholder/token being
+replaced. It assumes that the string being expanded has been
+deleted and placed into the else-deleted-string variable.
+
+Add some basic code here that makes sure Context_dependent work better!
+For example:
+
+if <<there is nothing else preceding the placeholder>> AND
+   <<we can locate a separator string immediately preceding>> then
+   Vertical substitution is appropriate
+else
+   Perform Horizontal substitution
+end if"
   (let ((separator-type)
         (newline-at-start)
         (cur-column indent-column))
@@ -3647,12 +3590,11 @@ Where FORMS is any sequence of Elisp commands i.e.
           (setq forms (cdr forms)))))))
 
 
-;;
-;; Generalised search routine that provides access to either regular searches
-;; or regular expression searches either forward or backward of `point' but
-;; ultimately search limited to the current line.
-;;
 (defun else-scan-for-match (match-string regexp &optional direction-reverse)
+  "Generalised search routine that provides access to either
+regular searches or regular expression searches either forward or
+backward of `point' but ultimately search limited to the current
+line."
   (let ((current-position) (search-limit))
 
     ;;
