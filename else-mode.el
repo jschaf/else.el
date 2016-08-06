@@ -4295,17 +4295,6 @@ else-show-token-names"
   :type '(repeat (cons string string))
   :group 'ELSE)
 
-;;; elsemode.el ends here
-;; LocalWords:  elsemode Milliken dosuser peterm msg esl lse setq progn concat
-;; LocalWords:  keymaps keymap eg ada lang keypress obarray mapatom nthcdr alist
-;; LocalWords:  NOAUTOSUBSTITUTE da mapatoms se sl utils obarrays thru Ok defun
-;; LocalWords:  fName Unintern cdr assoc NOAUTO NOLIST Placeholder's lineno VR
-;; LocalWords:  regexp cust Keybindings dir ARG uit revious placeholders struct
-;; LocalWords:  VoiceCoder count'th barfing XEmacs cond xemacs fns Monnier wrt
-;; LocalWords:  setnu placeholder ONINSERT FSF ref zA NOFOLLOW ie Stefan elisp
-;; LocalWords:  oninsert yuk vetted TOKENs Jun comps nofollow refs def pre defn
-;; LocalWords:  ext DimGray LightGray RosyBrown LightSalmon
-
 (provide 'else-mode)
 
 ;;; else-mode.el ends here
