@@ -39,37 +39,38 @@
   :group 'tools)
 
 (defcustom else-prompt-time 3
-  "Prompter Screen display time in seconds"
+  "Prompter Screen display time in seconds."
   :type 'integer
   :group 'ELSE)
 
 (defcustom else-kill-proceed-to-next-placeholder nil
-  "Should else-kill-placeholder goto next placeholder after a kill or not"
+  "`else-kill-placeholder' goes to next placeholder after when non-nil."
   :type 'boolean
   :group 'ELSE)
 
 (defcustom else-set-lineno nil
-  "Turn line numbering in the Menu buffer on or off. Requires setnu.el."
+  "Enable line numbering in the menu buffer when non-nil."
   :type 'boolean
   :group 'ELSE)
 
 (defcustom else-move-and-execute nil
-  "If set, then if a command fails then a movement-<execute> pair is assumed
-where <execute> is the requested operation and the movement is determined by the
-else-direction flag - note that the 'command' is currently restricted to expand
-and kill operations only."
+  "Move to next placeholder if a command fails when non-nil.
+If set, then if a command fails then a movement-<execute> pair is
+assumed where <execute> is the requested operation and the
+movement is determined by the else-direction flag - note that the
+'command' is currently restricted to expand and kill operations
+only."
   :type 'boolean
   :group 'ELSE)
 
 (defcustom else-direction t
-  "If expand-or-move is enabled, this flag determines the direction of movement
-   on  - next placeholder
-   off - previous placeholder"
+  "If expand-or-move is enabled, this flag determines the direction of movement.
+on - next placeholder off - previous placeholder"
   :type 'boolean
   :group 'ELSE)
 
 (defcustom else-only-proceed-within-window t
-  "Move after a kill only if the next placeholder is visible in the current window.
+  "Move after a kill only if the next placeholder is visible.
 This flag controls jumps when they are part of a composite action by ELSE
 i.e. in kill-placeholder, if the kill-proceed flags is set then this flag
 allows the move to the next placeholder only if it is visible in the current
@@ -1469,11 +1470,11 @@ POSSIBLE-MATCHES ."
           ;; temporary buffer and display the data.
           (setq my-buffer (get-buffer-create " *ELSE Menu List*"))
           (set-buffer my-buffer)
-          (if (and else-set-lineno (featurep 'setnu))
+          (if (and else-set-lineno)
               ;; Don't have to worry about "standard" minor mode behaviour of
               ;; each call "toggling" the mode as this mode allows a positive
               ;; argument to indicate that the mode should be turned on.
-              (setnu-mode 1)))
+              (linum-mode)))
 
         (erase-buffer)
 
