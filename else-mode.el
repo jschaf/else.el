@@ -458,7 +458,7 @@ For example, it might be either a placeholder or a token.")
 (defvar-local else-Placeholder ()
   "Array holding the `placeholder' tokens for the current language.")
 
-(defvar-local Token ()
+(defvar-local else-Token ()
   "Array holding the `token' tokens for the current language." )
 
 (defvar-local Language-Specifics ()
@@ -605,7 +605,7 @@ auto-substitute \"pair\"s."
             (setq result t)))))
     result))
 
-;; The Placeholder and Token variables are obarrays of considerable
+;; The Placeholder and else-Token variables are obarrays of considerable
 ;; length.  Rather than take up space in Emacs memory when ELSE is not active, I
 ;; don't bother initialising them until they are required.  This routine is
 ;; called by the language loading procedures.
@@ -617,7 +617,7 @@ auto-substitute \"pair\"s."
           (setq result nil)
           (setq else-Placeholder
                 (make-vector else-Placeholder-Vector-Size 0))
-          (setq Token (make-vector else-Token-Vector-Size 0))
+          (setq else-Token (make-vector else-Token-Vector-Size 0))
           (setq Language-Specifics
                 (list (cons else-Language-Name           "")
                       (cons else-Punctuation-ref         "")
@@ -633,7 +633,7 @@ auto-substitute \"pair\"s."
           (setq else-Language-Definitions
                 (cons
                  (cons language
-                       (list else-Placeholder Token Language-Specifics))
+                       (list else-Placeholder else-Token Language-Specifics))
                  else-Language-Definitions))))
     result))
 
@@ -1195,7 +1195,7 @@ Called upon detection of the 'DELETE' token in the template source file."
                             (cond ((char-equal array-type ?p)
                                    (setq obarray-name else-Placeholder))
                                   ((char-equal array-type ?t)
-                                   (setq obarray-name Token)))
+                                   (setq obarray-name else-Token)))
                             (if obarray-name
                                 (unintern (upcase object-name) obarray-name)))
                         (message "This language (%s) has not been defined!"
@@ -1230,9 +1230,9 @@ Called when the sequence 'DELETE LANGUAGE' has been parsed in
                             (message "Can't delete from else-Placeholder")))
                       else-Placeholder)
             (mapatoms (lambda (s)
-                        (if (not (unintern s Token))
-                            (message "Can't delete from Token")))
-                      Token)
+                        (if (not (unintern s else-Token))
+                            (message "Can't delete from else-Token")))
+                      else-Token)
             (setq language-assoc
                   (assoc language-name else-Language-Definitions))
             (if language-assoc
@@ -1537,7 +1537,7 @@ Note that the file name parameter must have been already vetted to make sure
 it complies with the else naming conventions ie .esl"
   (let ((language-output-buffer))
     ;; The language definition should be in the local copies of else-Placeholder,
-    ;; Token and Language-Specifics.  So we can take that and write it out to
+    ;; else-Token and Language-Specifics.  So we can take that and write it out to
     ;; the language compilation file.
     (save-excursion
       (setq language-output-buffer
@@ -1546,12 +1546,12 @@ it complies with the else naming conventions ie .esl"
       (setq else-read-marker (point-marker)))
 
     ;; Ok, all set to write the data to the buffer.  Write the language specific
-    ;; information and then each element of the else-Placeholder and Token obarrays.
+    ;; information and then each element of the else-Placeholder and else-Token obarrays.
     (print Language-Specifics else-read-marker)
     (setq else-type-of-symbols ?p)
     (mapatoms 'else-store-element else-Placeholder)
     (setq else-type-of-symbols ?t)
-    (mapatoms 'else-store-element Token)
+    (mapatoms 'else-store-element else-Token)
 
     (save-excursion
       (set-buffer language-output-buffer)
@@ -1581,7 +1581,7 @@ set for this buffer."
     (if language-assoc
         (progn
           (setq else-Placeholder (car language-assoc))
-          (setq Token (car (cdr language-assoc)))
+          (setq else-Token (car (cdr language-assoc)))
           (setq Language-Specifics (car (cdr (cdr language-assoc))))
           (setq else-Current-Language language-name)
           (setq result t)))
@@ -1677,7 +1677,7 @@ point for expanding either a placeholder or a token."
                     ;; expected to work for TOKENs! This code does not guarantee
                     ;; this!!!!
                     (progn
-                      (if (expand-a-word (else-return-sorted-list Token))
+                      (if (expand-a-word (else-return-sorted-list else-Token))
                           (else-after-token)))
 
                   ;; else point may be in the middle of a string? If so then
@@ -1690,7 +1690,7 @@ point for expanding either a placeholder or a token."
                       (if (match-string 0)
                           (progn
                             (goto-char (match-beginning 0))
-                            (if (expand-a-word (else-return-sorted-list Token))
+                            (if (expand-a-word (else-return-sorted-list else-Token))
                                 (else-after-token))))))))))
 
       ;; O.K. If it's a placeholder or a token then process it.
@@ -1802,11 +1802,11 @@ template."
                      (intern-soft (upcase element-name)
                                   else-Placeholder))) sorted-names)
 
-          (setq sorted-names (else-return-sorted-list Token))
+          (setq sorted-names (else-return-sorted-list else-Token))
           (mapc #'(lambda (element-name)
                     (else-extract-a-token
                      (intern-soft (upcase element-name)
-                                  Token))) sorted-names)
+                                  else-Token))) sorted-names)
 
           ;; Restore the original language (assuming there was one)
           (if current-language
@@ -2229,7 +2229,7 @@ defun."
         (progn
           (setq completion-ignore-case t)
           (setq name
-                (completing-read "Token Name: " Token))
+                (completing-read "Token Name: " else-Token))
           (setq name (upcase name))
           (setq selected-definition (else-look-up name ?t))
           (if selected-definition
@@ -2265,9 +2265,9 @@ This is a list of strings."
         (get place-def 'else-description-ref))))
 
 (defun else-get-entry (name-string type)
-  "Get a definition from either the else-Placeholder or Token definition array."
+  "Get a definition from either the else-Placeholder or else-Token definition array."
   (let ((obarray-name nil))
-    (cond ((char-equal type ?t) (setq obarray-name Token))
+    (cond ((char-equal type ?t) (setq obarray-name else-Token))
           ((char-equal type ?p) (setq obarray-name else-Placeholder)))
 
     (if obarray-name
@@ -2528,7 +2528,7 @@ auto-substitute placeholder."
         ;; It is possible for the user to have an auto-mode-alist entry for
         ;; files of .lse type that will enable else-mode and load the language
         ;; templates for .lse files - this causes a mix-up in the
-        ;; else-Placeholder/Token definitions if this happens.  So temporarily disable
+        ;; else-Placeholder/else-Token definitions if this happens.  So temporarily disable
         ;; the entry if it exists in the auto-mode-alist when we are
         ;; auto-loading .lse files - re-enable it at the end of this
         ;; function.  Note that this is done using the "let" definition for
@@ -2685,7 +2685,7 @@ stop the forwarding referrals i.e. we wish to kill what is there not
 what might have been there :-)."
   (let ((obarray-name nil)
         definition)
-    (cond ((char-equal type ?t) (setq obarray-name Token))
+    (cond ((char-equal type ?t) (setq obarray-name else-Token))
           ((char-equal type ?p) (setq obarray-name else-Placeholder)))
 
     (if obarray-name
@@ -2929,7 +2929,7 @@ Keybindings:
                             (else-derive-language-name-from-mode-name mode-name)))
 
                     (setq else-Placeholder (car language-assoc))
-                    (setq Token (car (cdr language-assoc)))
+                    (setq else-Token (car (cdr language-assoc)))
                     (setq Language-Specifics (car (cdr (cdr language-assoc))))
                     (else-setup-change-hooks)
 
@@ -3011,7 +3011,7 @@ and removing functions from various change hooks."
     (kill-local-variable 'else-Current-Language)
     (kill-local-variable 'else-mode)
     (kill-local-variable 'else-Placeholder)
-    (kill-local-variable 'Token)
+    (kill-local-variable 'else-Token)
     (kill-local-variable 'Language-Specifics)
     (kill-local-variable 'else-Current-Language)
 
@@ -3629,7 +3629,7 @@ end if"
                            (setq obarray-name else-Placeholder))
                           ((char-equal read-type ?t)
                            ;; Actions for a token
-                           (setq obarray-name Token))
+                           (setq obarray-name else-Token))
                           (t
                            (setq result nil)))
 
@@ -3915,7 +3915,7 @@ set, sort them alphabetically and display them in a temporary buffer."
           (setq placeholder-list (cdr placeholder-list)))))))
 
 (defun else-show-token-names ()
-  "Display names of all of the Tokens in the current language template
+  "Display names of all of the else-Tokens in the current language template
 set, sort them alphabetically and display them in a temporary buffer."
   (interactive)
   (let ((token-list)
@@ -3930,7 +3930,7 @@ set, sort them alphabetically and display them in a temporary buffer."
           (error "ELSE mode not enabled for this buffer."))
       (with-output-to-temp-buffer "*Available Tokens*"
         ;; Put all of the token names into an alphabetically sorted list
-        (setq token-list (else-return-sorted-list Token))
+        (setq token-list (else-return-sorted-list else-Token))
 
         ;; Nice to have good formatting for the output - determine the longest
         ;; token name and incorporate the length into the format string.  Start
@@ -4203,7 +4203,7 @@ insert the string at point."
           (forward-word -1)
           (setq matched-string (buffer-substring (point) here))
           (delete-region (point) here)
-          (if (not (else-find-template matched-string Token))
+          (if (not (else-find-template matched-string else-Token))
               (progn
                 (insert matched-string)
                 (goto-char here))))))))
