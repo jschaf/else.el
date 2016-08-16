@@ -496,11 +496,11 @@ argument to the called routine.")
 
 
 (defvar else-read-marker nil
-  "This is the marker that tracks the read process used by
-else-compile-fast-load and else-restore.  We use a marker into the
-restore file because the 'read' function automatically increments
-the marker as it reads each line.  Again, the variable is only
-required to be global because of the use of 'mapatoms'.")
+  "Marker to track the read process for else-compile-fast-load and else-restore.
+We use a marker into the restore file because the 'read' function
+automatically increments the marker as it reads each line.
+Again, the variable is only required to be global because of the
+use of 'mapatoms'.")
 
 (defconst else-lse-ext "\.lse")
 (defconst else-esl-ext "\.esl")
@@ -513,7 +513,9 @@ required to be global because of the use of 'mapatoms'.")
 Its primary purpose is to act in situations where the
 auto-substitute function is active and the change has occurred in
 the specified region.  It must repeat the change into each of the
-auto-substitute \"pair\"s."
+auto-substitute \"pair\"s.
+BEGIN and END limit the area of change.
+TODO: LENGTH is unused."
   (let ((marker-index)
         (move-text)
         (local-begin begin)
@@ -574,11 +576,11 @@ auto-substitute \"pair\"s."
 (defun else-after-token ()
   "Test if string preceding point is a valid token."
   (let ((here (point))
-        (result nil))
+        (result nil)
+        (match-scan (format "\\([^%s]+\\)\\|\\(^\\)"
+                            (cdr (assoc else-Valid-Idents-ref
+                                        Language-Specifics)))))
     (save-excursion
-      (setq match-scan (format "\\([^%s]+\\)\\|\\(^\\)"
-                               (cdr (assoc else-Valid-Idents-ref
-                                           Language-Specifics))))
       (when (else-scan-for-match match-scan nil t)
         (when (not (= (point) here))
           ;; We have found a (potential) token string, have to make a
@@ -639,14 +641,15 @@ auto-substitute \"pair\"s."
 
 
 (defun else-before-change (begin end)
-  "Function that runs as part of the before change functions.  Its
-main job is to determine whether the command is a \"self-insert\"
-and if so, whether the cursor is within a placeholder, if these
-conditions are true then it must delete the placeholder before
-allowing the command to proceed.  It also checks whether the
-placeholder is part of an auto-substitute pairing and if so, sets
-up the appropriate global variables for use by the after change
-function."
+  "General function to run `before-change-functions'.
+Its main job is to determine whether the command is a
+\"self-insert\" and if so, whether the cursor is within a
+placeholder, if these conditions are true then it must delete the
+placeholder before allowing the command to proceed.  It also
+checks whether the placeholder is part of an auto-substitute
+pairing and if so, sets up the appropriate global variables for
+use by the after change function.  BEGIN is beginning of text
+change and END is the end of the text change."
   (let ((data (match-data))
         (is-auto-sub)
         (this-pos)
@@ -1441,9 +1444,10 @@ Argument THIS-MODE-NAME current mode name."
 
 (defun else-display-menu (possible-matches &optional momentary-only)
   "Display menu of possible choices for expand-a-word function.
-  It is not called unless there is more than one possible match.
-Doubles as prompt display as well - yuk.  Argument
-POSSIBLE-MATCHES ."
+It is not called unless there is more than one possible match.
+Doubles as prompt display as well - yuk.  POSSIBLE-MATCHES is the
+list of strings to display.  If MOMENTARY-ONLY is non-nil, then
+use a placeholder prompt buffer."
   (let ((my-buffer)
         (start-window (selected-window))
         (menu-string ""))
