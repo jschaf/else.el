@@ -455,7 +455,7 @@ For example, it might be either a placeholder or a token.")
 ;; user may decide it would be nice to have two versions of the STATEMENT
 ;; placeholder.  This is currently not available but could easily be added. At
 ;; the moment, change one and all buffers are affected.
-(defvar-local Placeholder ()
+(defvar-local else-Placeholder ()
   "Array holding the `placeholder' tokens for the current language.")
 
 (defvar-local Token ()
@@ -615,7 +615,7 @@ auto-substitute \"pair\"s."
     (if (not (assoc language else-Language-Definitions))
         (progn
           (setq result nil)
-          (setq Placeholder
+          (setq else-Placeholder
                 (make-vector else-Placeholder-Vector-Size 0))
           (setq Token (make-vector else-Token-Vector-Size 0))
           (setq Language-Specifics
@@ -633,7 +633,7 @@ auto-substitute \"pair\"s."
           (setq else-Language-Definitions
                 (cons
                  (cons language
-                       (list Placeholder Token Language-Specifics))
+                       (list else-Placeholder Token Language-Specifics))
                  else-Language-Definitions))))
     result))
 
@@ -1193,7 +1193,7 @@ Called upon detection of the 'DELETE' token in the template source file."
                       (if (else-establish-language language-name)
                           (progn
                             (cond ((char-equal array-type ?p)
-                                   (setq obarray-name Placeholder))
+                                   (setq obarray-name else-Placeholder))
                                   ((char-equal array-type ?t)
                                    (setq obarray-name Token)))
                             (if obarray-name
@@ -1226,9 +1226,9 @@ Called when the sequence 'DELETE LANGUAGE' has been parsed in
       (if (else-establish-language language-name)
           (progn
             (mapatoms (lambda (s)
-                        (if (not (unintern s Placeholder))
-                            (message "Can't delete from Placeholder")))
-                      Placeholder)
+                        (if (not (unintern s else-Placeholder))
+                            (message "Can't delete from else-Placeholder")))
+                      else-Placeholder)
             (mapatoms (lambda (s)
                         (if (not (unintern s Token))
                             (message "Can't delete from Token")))
@@ -1536,7 +1536,7 @@ appropriately.  Return the resultant string."
 Note that the file name parameter must have been already vetted to make sure
 it complies with the else naming conventions ie .esl"
   (let ((language-output-buffer))
-    ;; The language definition should be in the local copies of Placeholder,
+    ;; The language definition should be in the local copies of else-Placeholder,
     ;; Token and Language-Specifics.  So we can take that and write it out to
     ;; the language compilation file.
     (save-excursion
@@ -1546,10 +1546,10 @@ it complies with the else naming conventions ie .esl"
       (setq else-read-marker (point-marker)))
 
     ;; Ok, all set to write the data to the buffer.  Write the language specific
-    ;; information and then each element of the Placeholder and Token obarrays.
+    ;; information and then each element of the else-Placeholder and Token obarrays.
     (print Language-Specifics else-read-marker)
     (setq else-type-of-symbols ?p)
-    (mapatoms 'else-store-element Placeholder)
+    (mapatoms 'else-store-element else-Placeholder)
     (setq else-type-of-symbols ?t)
     (mapatoms 'else-store-element Token)
 
@@ -1580,7 +1580,7 @@ set for this buffer."
           (cdr (assoc language-name else-Language-Definitions)))
     (if language-assoc
         (progn
-          (setq Placeholder (car language-assoc))
+          (setq else-Placeholder (car language-assoc))
           (setq Token (car (cdr language-assoc)))
           (setq Language-Specifics (car (cdr (cdr language-assoc))))
           (setq else-Current-Language language-name)
@@ -1796,11 +1796,11 @@ template."
           ;; Extract all the placeholder and token definitions.  Do this by
           ;; getting a alphabetically sorted list of the placeholder/token names
           ;; and then processing each of the definitions individually
-          (setq sorted-names (else-return-sorted-list Placeholder))
+          (setq sorted-names (else-return-sorted-list else-Placeholder))
           (mapc #'(lambda (element-name)
                     (else-extract-a-placeholder
                      (intern-soft (upcase element-name)
-                                  Placeholder))) sorted-names)
+                                  else-Placeholder))) sorted-names)
 
           (setq sorted-names (else-return-sorted-list Token))
           (mapc #'(lambda (element-name)
@@ -2173,12 +2173,12 @@ definition.  Assumes that the match-data information is valid!"
         (progn
           (setq completion-ignore-case t)
           (setq name
-                (completing-read "Placeholder Name: " Placeholder))
+                (completing-read "Placeholder Name: " else-Placeholder))
           (setq name (upcase name))
           (setq selected-definition (else-look-up name ?p t))
           (if selected-definition
               (else-extract-a-placeholder selected-definition)
-            (message "Placeholder \`%s\` doesn't exist" name))
+            (message "else-Placeholder \`%s\` doesn't exist" name))
 
           (setq completion-ignore-case temp)
           ;; Restore the original language (assuming there was one)
@@ -2265,10 +2265,10 @@ This is a list of strings."
         (get place-def 'else-description-ref))))
 
 (defun else-get-entry (name-string type)
-  "Get a definition from either the Placeholder or Token definition array."
+  "Get a definition from either the else-Placeholder or Token definition array."
   (let ((obarray-name nil))
     (cond ((char-equal type ?t) (setq obarray-name Token))
-          ((char-equal type ?p) (setq obarray-name Placeholder)))
+          ((char-equal type ?p) (setq obarray-name else-Placeholder)))
 
     (if obarray-name
         (intern name-string obarray-name))))
@@ -2528,7 +2528,7 @@ auto-substitute placeholder."
         ;; It is possible for the user to have an auto-mode-alist entry for
         ;; files of .lse type that will enable else-mode and load the language
         ;; templates for .lse files - this causes a mix-up in the
-        ;; Placeholder/Token definitions if this happens.  So temporarily disable
+        ;; else-Placeholder/Token definitions if this happens.  So temporarily disable
         ;; the entry if it exists in the auto-mode-alist when we are
         ;; auto-loading .lse files - re-enable it at the end of this
         ;; function.  Note that this is done using the "let" definition for
@@ -2686,7 +2686,7 @@ what might have been there :-)."
   (let ((obarray-name nil)
         definition)
     (cond ((char-equal type ?t) (setq obarray-name Token))
-          ((char-equal type ?p) (setq obarray-name Placeholder)))
+          ((char-equal type ?p) (setq obarray-name else-Placeholder)))
 
     (if obarray-name
         (progn
@@ -2928,7 +2928,7 @@ Keybindings:
                       (setq else-Current-Language
                             (else-derive-language-name-from-mode-name mode-name)))
 
-                    (setq Placeholder (car language-assoc))
+                    (setq else-Placeholder (car language-assoc))
                     (setq Token (car (cdr language-assoc)))
                     (setq Language-Specifics (car (cdr (cdr language-assoc))))
                     (else-setup-change-hooks)
@@ -3010,7 +3010,7 @@ and removing functions from various change hooks."
     (kill-local-variable 'else-Auto-Sub-Marker-List)
     (kill-local-variable 'else-Current-Language)
     (kill-local-variable 'else-mode)
-    (kill-local-variable 'Placeholder)
+    (kill-local-variable 'else-Placeholder)
     (kill-local-variable 'Token)
     (kill-local-variable 'Language-Specifics)
     (kill-local-variable 'else-Current-Language)
@@ -3626,7 +3626,7 @@ end if"
                     (setq read-type (nth 1 entire))
                     (cond ((char-equal read-type ?p)
                            ;; Actions for a placeholder
-                           (setq obarray-name Placeholder))
+                           (setq obarray-name else-Placeholder))
                           ((char-equal read-type ?t)
                            ;; Actions for a token
                            (setq obarray-name Token))
@@ -3852,7 +3852,7 @@ the hook function."
             'local))
 
 (defun else-show-placeholder-names ()
-  "Display names of all of the Placeholders in the current language template
+  "Display names of all of the else-Placeholders in the current language template
 set, sort them alphabetically and display them in a temporary buffer."
   (interactive)
   (let ((placeholder-list)
@@ -3867,7 +3867,7 @@ set, sort them alphabetically and display them in a temporary buffer."
           (error "ELSE mode not enabled for this buffer."))
       (with-output-to-temp-buffer "*Available Placeholders*"
         ;; Put all of the placeholder names into an alphabetically sorted list
-        (setq placeholder-list (else-return-sorted-list Placeholder))
+        (setq placeholder-list (else-return-sorted-list else-Placeholder))
 
         ;; Nice to have good formatting for the output - determine the longest
         ;; placeholder name and incorporate the length into the format
@@ -4170,7 +4170,7 @@ This function reverses the effects of else-comment-placeholders."
                    ;; i.e. there is more than one possible completion.
                    (with-output-to-temp-buffer "*Completions*"
                      (display-completion-list
-                      (all-completions matched-string Placeholder)))
+                      (all-completions matched-string else-Placeholder)))
                    (setq succeeded nil))
                (progn
                  (setq match-data (downcase match-data))
@@ -4194,7 +4194,7 @@ insert the string at point."
             (forward-char)
             (setq matched-string (buffer-substring (point) here))
             (delete-region (point) here)
-            (if (not (else-find-template matched-string Placeholder))
+            (if (not (else-find-template matched-string else-Placeholder))
                 (progn
                   (insert matched-string)
                   (goto-char here))))
@@ -4236,7 +4236,7 @@ second line of the placeholder being used."
     (if (not else-mode)
         (error "Must have a language loaded to run this function.")
       (setq template-name
-            (completing-read "Placeholder: " Placeholder))
+            (completing-read "Placeholder: " else-Placeholder))
       (delete-region begin end)
       (newline)
       (forward-line -1)
