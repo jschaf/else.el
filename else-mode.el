@@ -1508,9 +1508,9 @@ use a placeholder prompt buffer."
           (recursive-edit))))))
 
 (defun else-display-menu-element (body-element)
-  "Given a definition body element, extract the appropriate
-information for inclusion in a menu display and format it
-appropriately.  Return the resultant string."
+  "Extract the appropriate information for inclusion in a menu display.
+Format the information from the BODY-ELEMENT appropriately and
+return the resultant string."
   (let ((description nil)
         (element-text)
         (current-type)
@@ -1536,29 +1536,27 @@ appropriately.  Return the resultant string."
     result))
 
 (defun else-dump-language (compiled-file-name)
-  "Dump the current buffer language template to the named file.
-Note that the file name parameter must have been already vetted to make sure
-it complies with the else naming conventions ie .esl"
-  (let ((language-output-buffer))
+  "Dump the current buffer language template to COMPILED-FILE-NAME.
+Note that the file name parameter must have been already vetted
+to make sure it complies with the else naming conventions i.e.
+.esl."
+  (let ((language-output-buffer (find-file-noselect compiled-file-name t)))
     ;; The language definition should be in the local copies of else-Placeholder,
     ;; else-Token and Language-Specifics.  So we can take that and write it out to
     ;; the language compilation file.
-    (save-excursion
-      (setq language-output-buffer
-            (find-file-noselect compiled-file-name t))
-      (set-buffer language-output-buffer)
+    (with-current-buffer language-output-buffer
       (setq else-read-marker (point-marker)))
 
     ;; Ok, all set to write the data to the buffer.  Write the language specific
-    ;; information and then each element of the else-Placeholder and else-Token obarrays.
+    ;; information and then each element of the else-Placeholder and else-Token
+    ;; obarrays.
     (print Language-Specifics else-read-marker)
     (setq else-type-of-symbols ?p)
     (mapatoms 'else-store-element else-Placeholder)
     (setq else-type-of-symbols ?t)
     (mapatoms 'else-store-element else-Token)
 
-    (save-excursion
-      (set-buffer language-output-buffer)
+    (with-current-buffer language-output-buffer
       (save-buffer))
     ;; Clean up the output buffer.
     (kill-buffer language-output-buffer)))
