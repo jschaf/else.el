@@ -1562,16 +1562,15 @@ to make sure it complies with the else naming conventions i.e.
     (kill-buffer language-output-buffer)))
 
 (defun else-enable-dups (map command-to-search-out replacement-command)
-  "Make sure that all key-bindings that bind to the expansion
-command are echoed in the menu selection keymap ie the user
-doesn't have to move his fingers from the command that caused a
-menu pick list to be displayed."
-  (let (abc)
-    (setq abc (where-is-internal command-to-search-out))
-    (while abc
-      (progn
-        (define-key map (car abc) replacement-command)
-        (setq abc (cdr abc))))))
+  "Ensure all expansion command key-bindings are echoed.
+The command are echoed in the menu selection keymap.  This is so
+the user doesn't have to move their fingers from the command that
+caused a menu pick list to be displayed.
+
+Replaces key-bindings in MAP that call COMMAND-TO-SEARCH-OUT with
+REPLACEMENT-COMMAND."
+  (dolist (existing-key-binding (where-is-internal command-to-search-out))
+    (define-key map existing-key-binding replacement-command)))
 
 (defun else-establish-language (language-name)
   "Set language template set 'language-name as the current language defintion template
