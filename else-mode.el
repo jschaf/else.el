@@ -1573,8 +1573,7 @@ REPLACEMENT-COMMAND."
     (define-key map existing-key-binding replacement-command)))
 
 (defun else-establish-language (language-name)
-  "Set language template set 'language-name as the current language defintion template
-set for this buffer."
+  "Set LANGUAGE-NAME as the current language defintion template in buffer."
   (let ((language-assoc)
         (result nil))
     (setq language-assoc
@@ -1589,18 +1588,19 @@ set for this buffer."
     result))
 
 (defun else-expand-item-at-overlay (item)
-  "Expand the object (placeholder or token) 'item at the location of the
-else-placeholder-overlay.  This defun is designed to be called by an external
-entity with a selection from a menu that was constructed using
-else-get-menu-entries.  It must work in conjunction with the use of the Overlay
-denoted by else-placeholder-overlay."
+  "Expand the placeholder or token ITEM.
+ITEM is expanded at else-placeholder-overlay.  This defun is
+designed to be called by an external entity with a selection from
+a menu that was constructed using else-get-menu-entries.  It must
+work in conjunction with the use of the Overlay denoted by
+else-placeholder-overlay."
   (let ((this-definition nil)
         (origin nil))
     ;; Protect against inadvertent use
     (catch 'problem
       (if (not else-mode)
           (progn
-            (error "ELSE mode not enabled.")
+            (error "ELSE mode not enabled")
             (throw 'problem nil)))
 
       (if (overlayp else-placeholder-overlay)
@@ -1640,7 +1640,8 @@ denoted by else-placeholder-overlay."
 This function name is a misnomer, this routine is the general start
 point for expanding either a placeholder or a token."
   (interactive)
-  (let ((here (point)))
+  (let ((here (point))
+        match-scan)
     (catch 'problem
       (if (not else-mode)
           (progn
@@ -1713,7 +1714,7 @@ point for expanding either a placeholder or a token."
           ;; search-direction results in a crash (endless loop).  This situation
           ;; is quite likely if you use speech recognition and try to expand a
           ;; token.
-          (if (and else-move-and-execute (interactive-p))
+          (if (and else-move-and-execute (called-interactively-p 'interactive))
               ;; User must desire a movement and then an expansion i.e. the next
               ;; placeholder can be "seen" and an expansion is desired there.
               (progn
@@ -1729,7 +1730,7 @@ point for expanding either a placeholder or a token."
             (if else-move-and-execute
                 (message "Not a valid placeholder or token.")
               (goto-char here)
-              (error "Not a valid placeholder or token."))))))))
+              (error "Not a valid placeholder or token"))))))))
 
 ;;
 ;; These routines provide the 'extract' feature of ELSE
