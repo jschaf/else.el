@@ -1732,12 +1732,9 @@ point for expanding either a placeholder or a token."
               (goto-char here)
               (error "Not a valid placeholder or token"))))))))
 
-;;
-;; These routines provide the 'extract' feature of ELSE
-;;
 (defun else-extract-all ()
-  "Extract all placeholders and tokens definitions for the enabled language
-template."
+  "Extract all placeholders and tokens definitions.
+Extracts for the enabled language template."
   (interactive)
   (let ((current-language else-Current-Language)
         (sorted-names))
@@ -1815,7 +1812,7 @@ template."
               (else-establish-language current-language))))))
 
 (defun else-extract-a-placeholder (placeholder-definition)
-  "Extract an individual placeholder definition.
+  "Extract an individual PLACEHOLDER-DEFINITION.
 This function is a non-interactive form.  See
 else-extract-placeholder for interactive use."
   (let ((selected-definition placeholder-definition)
@@ -1930,7 +1927,7 @@ else-extract-placeholder for interactive use."
     (newline)))
 
 (defun else-extract-a-token (token-definition)
-  "Extract an individual token definition.
+  "Extract an individual TOKEN-DEFINITION.
 This function is a non-interactive form.  See else-extract-token
 for interactive use."
   (let ((selected-definition token-definition)
@@ -1989,7 +1986,8 @@ for interactive use."
     (newline)))
 
 (defun else-extract-body (indent-level-size)
-"This routine assumes that it has been called after a regular
+"Extract the body of a template respecting INDENT-LEVEL-SIZE.
+This routine assumes that it has been called after a regular
 expression match that indicates a line from the body of a
 definition has been found ie. \".*\".  The entry for the body
 form can be of the form \" text \" with an optional trailer(s) of
@@ -2011,7 +2009,7 @@ Further processing is made easier if there are three elements in
 each 'body' entry, so start the definition off with nil for all
 three elements and then replace them as needed.  The order is
 /PLACEHOLDER or /TOKEN, indentation and then \"any text\".  It
-assumes that the match-data from the \"body\" search string is
+assumes that the `match-data' from the \"body\" search string is
 still valid!
 
 28-Jun-2002: Found a problem when attempting to define bodies
@@ -2038,7 +2036,7 @@ denote 'hard' spaces."
         (if (not this-indent-size)
             (setq this-indent-size 0)))
       ;; If there is an indent, then calculate it as a multiple of the global
-      ;; value 'indent-level-size
+      ;; value indent-level-size
       (if (> this-indent-size 0)
           (progn
             ;; First, make sure we strip out the white i.e. we don't want to
@@ -2146,8 +2144,8 @@ denote 'hard' spaces."
     result))
 
 (defun else-extract-duplication-info ()
-  "Extract the \"duplication\" information from the template
-definition.  Assumes that the match-data information is valid!"
+  "Extract duplication information from the template definition.
+Assumes that the `match-data' information is valid!"
   (let ((this-line))
     (setq this-line
           (else-strip-quotes (match-string else-body-command-2)))
@@ -2188,14 +2186,13 @@ definition.  Assumes that the match-data information is valid!"
               (else-establish-language current-language))))))
 
 (defun else-extract-runcode-component ()
-  "Extract the run_code components - uses variables declared in caller
-defun."
+  "Extract the run_code components.
+This method uses variables declared in the caller defun."
   (let ((temp)
         (tmp)
         (processing-function))
     ;; Do any /RUN_CODE attributes.
-    (setq temp (copy-alist (get
-                            selected-definition 'else-elisp-action)))
+    (setq temp (copy-alist (get selected-definition 'else-elisp-action)))
     ;; If there are run-time encodings then have to handle the fact that one or
     ;; more phases have the same function pointer.
     (while temp
